@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Détails du Dataset</title>
+</head>
+<body>
+    <h1>Détails du Dataset</h1>
+
+    <!-- Bouton pour supprimer les lignes sélectionnées -->
+    <button id="delete-rows-btn">Supprimer les lignes sélectionnées</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sélectionner</th> <!-- Colonne pour la sélection des lignes -->
+                {% for col, col_type in columns_with_types %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows_with_types %}
+                <tr>
+                    <!-- Case à cocher pour sélectionner la ligne -->
+                    <td><input type="checkbox" class="row-checkbox" data-row="{{ forloop.counter0 }}"></td>
+                    {% for cell, col, col_type in row %}
+                        <td>
+                            {% if col_type == 'bool' %}
+                                <!-- Select box pour les valeurs booléennes -->
+                                <select class="bool" data-row="{{ forloop.parentloop.counter0 }}" data-col="{{ forloop.counter0 }}">
+                                    <option value="True" {% if cell %}selected{% endif %}>True</option>
+                                    <option value="False" {% if not cell %}selected{% endif %}>False</option>
+                                </select>
+                            {% else %}
+                                <!-- Cellule modifiable pour les autres types -->
+                                <span class="editable-cell" data-row="{{ forloop.parentloop.counter0 }}" data-col="{{ forloop.counter0 }}">
+                                    {{ cell }}
+                                </span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'dashboard:detail_workspace' workspace.id %}">Retour au Workspace</a>
+
+    <script>
+        // Fonction pour récupérer le token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Gestion de la modification des cellules booléennes
+            document.querySelectorAll(".bool").forEach(function(selectBox) {
+                selectBox.addEventListener("change", function() {
+                    const rowIndex = this.getAttribute("data-row");
+                    const colIndex = this.getAttribute("data-col");
+                    const newValue = this.value;
+
+                    fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/update-cell/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-CSRFToken": csrftoken,
+                        },
+                        body: `row=${rowIndex}&column=${colIndex}&value=${newValue}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert(data.message);
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error("Erreur lors de la mise à jour de la cellule:", error));
+                });
+            });
+
+            // Gestion de la modification des autres cellules
+            document.querySelectorAll(".editable-cell").forEach(function(cell) {
+                cell.addEventListener("click", function() {
+                    const rowIndex = this.getAttribute("data-row");
+                    const colIndex = this.getAttribute("data-col");
+                    const currentValue = this.innerText;
+
+                    const newValue = prompt("Entrez une nouvelle valeur pour la cellule", currentValue);
+                    if (newValue !== null) {
+                        fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/update-cell/`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                "X-CSRFToken": csrftoken,
+                            },
+                            body: `row=${rowIndex}&column=${colIndex}&value=${newValue}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                cell.innerText = newValue;
+                                alert(data.message);
+                            } else {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => console.error("Erreur lors de la mise à jour de la cellule:", error));
+                    }
+                });
+            });
+
+            // Suppression des lignes sélectionnées
+            document.getElementById("delete-rows-btn").addEventListener("click", function() {
+                const selectedRows = [];
+                document.querySelectorAll(".row-checkbox:checked").forEach(function(checkbox) {
+                    selectedRows.push(checkbox.getAttribute("data-row"));
+                });
+
+                if (selectedRows.length > 0) {
+                    if (confirm("Êtes-vous sûr de vouloir supprimer les lignes sélectionnées ?")) {
+                        fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/delete-rows/`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": csrftoken,
+                            },
+                            body: JSON.stringify({ rows: selectedRows })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                alert(data.message);
+                                window.location.reload();
+                            } else {
+                                alert("Erreur lors de la suppression des lignes : " + data.message);
+                            }
+                        })
+                        .catch(error => console.error("Erreur lors de la suppression des lignes:", error));
+                    }
+                } else {
+                    alert("Veuillez sélectionner au moins une ligne à supprimer.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
