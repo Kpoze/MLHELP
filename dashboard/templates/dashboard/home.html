@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p>Vous êtes connecté !</p>
+    <p>Vos projets !</p>
+    <ul>
+        {% for workspace in workspaces %}
+          <li>
+            <a href="{% url 'dashboard:detail_workspace' workspace.id %}">{{ workspace.name }}</a>
+            - <a href="{% url 'dashboard:update_workspace' workspace.id %}">[modifier]</a>
+            - <a href="{% url 'dashboard:delete_workspace' workspace.id %}">[supprimer]</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p><a href="{% url 'dashboard:create_workspace' %}">créer un projet</a></p>
+{% endblock content %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Supprimer {{ workspace.name }}</h2>
+  <p>Êtes-vous sûr de vouloir supprimer ?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Oui, supprimer</button>
+  </form>
+  <a href="{% url 'dashboard:home' %}">Annuler</a>
+{% endblock %}
