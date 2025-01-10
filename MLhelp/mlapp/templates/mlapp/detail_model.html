@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p>Vous êtes connecté !</p>
+    <p>{{ dataset.name }}</p>
+    <ul>
+        {% for model in models %}
+          <li>
+            <a href="">{{ model.model_name }}</a>
+            - <a href="{% url 'mlapp:delete_model' workspace.id dataset.id model.id %}">[supprimer]</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p><a href="{% url 'mlapp:get_model' workspace.id dataset.id %}">ajouter un dataset</a></p>
+{% endblock content %}
+</body>
+</html>

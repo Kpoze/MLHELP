@@ -1,0 +1,8 @@
+{% block content %}
+  <h2>Modifier le workspace</h2>
+  <form method="post" enctype="multipart/form-data">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit">Mettre à jour</button>
+  </form>
+{% endblock %}

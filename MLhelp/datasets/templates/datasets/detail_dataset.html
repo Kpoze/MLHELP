@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Détails du Dataset - Filtrage et Affichage</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 15px;
+            margin: 5px 5px 5px 0;
+            cursor: pointer;
+        }
+        .tag .remove-tag {
+            margin-left: 8px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+        #filter-form-container {
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    </style>
+</head>
+<body>
+    <!-- Barre latérale de filtrage -->
+    <div class="sidebar">
+        <h4>Filtres</h4>
+        <button id="toggle-filter-btn" class="btn btn-primary mb-3">Afficher les filtres</button>
+        <div id="filter-form-container" style="display: none;">
+        <!-- Formulaire pour le filtrage dynamique -->
+        <form method="POST" action="{% url 'datasets:detail_dataset' workspace.id dataset.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="column_input" class="form-label">Colonne</label>
+                <select id="column_input" name="column_input" class="form-select">
+                    {% for col, col_type in columns_with_types %}
+                        <option value="{{ col }}">{{ col }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="relation_input" class="form-label">Relation</label>
+                <select id="relation_input" name="relation_input" class="form-select">
+                    <option value="==">Égal à</option>
+                    <option value=">">Supérieur à</option>
+                    <option value="<">Inférieur à</option>
+                    <option value=">=">Supérieur ou égal à</option>
+                    <option value="<=">Inférieur ou égal à</option>
+                    <option value="!=">Différent de</option>
+                </select>
+            </div>
+            <label for="value_input">Valeur:</label>
+            <input type="text" id="value_input" name="value_input" value="{{ form.value_input.value }}">
+            <div class="form-check">
+                <input type="checkbox" id="show_nulls_only" name="show_nulls_only" class="form-check-input" {% if form.show_nulls_only.value %}checked{% endif %}>
+                <label for="show_nulls_only" class="form-check-label">Afficher uniquement les valeurs nulles</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Appliquer le filtre</button>
+        </form>
+    </div>
+        <!-- Tags pour chaque colonne -->
+        <h5>Colonnes affichées</h5>
+        <div id="column-tags">
+            {% for col, col_type in columns_with_types %}
+                <span class="tag" data-col="{{ forloop.counter0 }}">
+                    {{ col }}
+                    <span class="remove-tag" data-col="{{ forloop.counter0 }}">&times;</span>
+                </span>
+            {% endfor %}
+        </div>
+
+        <!-- Bouton pour réinitialiser les colonnes masquées -->
+        <button id="reset-columns-btn" class="btn btn-secondary mt-3">Réinitialiser les colonnes</button>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns|join:',' }}" />
+            <button type="submit" name="save" id="save-dataset-btn" value="save">Sauvegarder</button>
+        </form>
+        <a href="{% url 'mlapp:detail_model' workspace.id dataset.id %}" class="btn btn-secondary mt-3">Modèle IA</a>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="content">
+        <h2>Dataset: {{ dataset.name }}</h2>
+
+        <!-- Bouton pour supprimer les lignes sélectionnées -->
+        <button id="delete-rows-btn" class="btn btn-danger mb-3">Supprimer les lignes sélectionnées</button>
+
+        <!-- Affichage de la table du dataset -->
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sélectionner</th> <!-- Colonne pour la sélection des lignes -->
+                        {% for col, col_type in columns_with_types %}
+                            <th class="column-header" data-col="{{ forloop.counter0 }}">{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows_with_types %}
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox" data-row="{{ forloop.counter0 }}"></td>
+                            {% for cell, col, col_type in row %}
+                                <td class="column-cell" data-col="{{ forloop.counter0 }}">
+                                    {% if col_type == 'bool' %}
+                                        <select class="bool" data-row="{{ forloop.parentloop.counter0 }}" data-col="{{ forloop.counter0 }}">
+                                            <option value="True" {% if cell %}selected{% endif %}>True</option>
+                                            <option value="False" {% if not cell %}selected{% endif %}>False</option>
+                                        </select>
+                                    {% else %}
+                                        <span class="editable-cell" data-row="{{ forloop.parentloop.counter0 }}" data-col="{{ forloop.counter0 }}">
+                                            {{ cell }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Lien retour au workspace -->
+        <a href="{% url 'dashboard:detail_workspace' workspace.id %}" class="btn btn-secondary mt-3">Retour au Workspace</a>
+    </div>
+
+    <!-- Script JavaScript pour la gestion des interactions -->
+<!-- Script JavaScript pour la gestion des interactions -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Récupération du token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // ------------------------- Gérer l'affichage / masquage des colonnes -------------------------
+    
+    // Masquage des colonnes en cliquant sur les tags
+    document.querySelectorAll(".remove-tag").forEach(function(removeTag) {
+        removeTag.addEventListener("click", function() {
+            const colIndex = this.getAttribute("data-col");
+            const columnHeader = document.querySelector(`th[data-col="${colIndex}"]`);
+            const colName = columnHeader ? columnHeader.textContent.trim() : 'Inconnu';
+
+            console.log(colName); // Affiche le nom de la colonne, par exemple "Nom"
+
+            // Masque la colonne
+            document.querySelectorAll(`[data-col="${colIndex}"]`).forEach(function(cell) {
+                cell.classList.add("hidden");
+            });
+
+            // Masque le tag
+            this.parentElement.classList.add("hidden");
+
+            // Met à jour l'input caché pour inclure la colonne masquée
+            const hiddenColumnsInput = document.getElementById('hidden_columns');
+            let hiddenColumns = hiddenColumnsInput.value.split(',');
+
+            if (colName && !hiddenColumns.includes(colName)) {
+                // Si la première entrée est vide, la retirer
+                if (hiddenColumns[0] === "") {
+                    hiddenColumns.shift();
+                }
+                hiddenColumns.push(colName);
+                hiddenColumnsInput.value = hiddenColumns.join(',');
+            }
+        });
+    });
+
+    // Réinitialisation de toutes les colonnes masquées
+    document.getElementById("reset-columns-btn").addEventListener("click", function() {
+        // Affiche toutes les colonnes masquées
+        document.querySelectorAll(".hidden").forEach(function(element) {
+            element.classList.remove("hidden");
+        });
+
+        // Réinitialise l'input caché
+        document.getElementById("hidden_columns").value = "";
+    });
+
+    // Lors du chargement de la page, réappliquer le masquage des colonnes si des colonnes sont masquées
+    const hiddenColumnsInput = document.getElementById("hidden_columns");
+    if (hiddenColumnsInput) {
+        const hiddenColumns = hiddenColumnsInput.value.split(',');
+        hiddenColumns.forEach(function(colName) {
+            if (colName) {
+                document.querySelectorAll(`[data-col="${colName}"]`).forEach(function(cell) {
+                    cell.classList.add("hidden");
+                });
+                document.querySelectorAll(`[data-col="${colName}"] + .remove-tag`).forEach(function(tag) {
+                    tag.parentElement.classList.add("hidden");
+                });
+            }
+        });
+    }
+
+    // ---------------------- Sauvegarde des données ----------------------
+        const saveButton = document.getElementById("save-dataset-btn");
+        saveButton.addEventListener("click", function () {
+        // Récupérer et convertir hidden_columns en liste
+        const hiddenColumnsValue = document.getElementById("hidden_columns").value;
+        const hiddenColumnsList = hiddenColumnsValue ? hiddenColumnsValue.split(',') : []; // Convertir en liste
+
+        const payload = {
+            hidden_columns: hiddenColumnsList, // Utiliser une liste ici
+            other_data: {} // Ajoutez d'autres données ici si nécessaire
+        };
+
+        fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/save/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(payload) // Envoyer le payload avec hidden_columns comme liste
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("Dataset sauvegardé avec succès !");
+            } else {
+                alert("Erreur lors de la sauvegarde : " + data.message);
+            }
+        })
+        .catch(error => console.error("Erreur lors de la sauvegarde :", error));
+    });
+
+    // -------------------- Gestion du formulaire de filtrage ---------------------
+    const toggleBtn = document.getElementById("toggle-filter-btn");
+    const filterContainer = document.getElementById("filter-form-container");
+
+    toggleBtn.addEventListener("click", function() {
+        if (filterContainer.style.display === "none" || filterContainer.style.display === "") {
+            filterContainer.style.display = "block";
+            toggleBtn.textContent = "Masquer les filtres";
+        } else {
+            filterContainer.style.display = "none";
+            toggleBtn.textContent = "Afficher les filtres";
+        }
+    });
+
+    // ------------------------- Modification des cellules -------------------------
+    // Gestion des modifications des cellules booléennes
+    document.querySelectorAll(".bool").forEach(function(selectBox) {
+        selectBox.addEventListener("change", function() {
+            const rowIndex = this.getAttribute("data-row");
+            const colIndex = this.getAttribute("data-col");
+            const newValue = this.value;
+
+            fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/update-cell/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrftoken },
+                body: `row=${rowIndex}&column=${colIndex}&value=${newValue}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => console.error("Erreur lors de la mise à jour de la cellule:", error));
+        });
+    });
+
+    // Gestion des autres cellules
+    document.querySelectorAll(".editable-cell").forEach(function(cell) {
+        cell.addEventListener("click", function() {
+            const rowIndex = this.getAttribute("data-row");
+            const colIndex = this.getAttribute("data-col");
+            const currentValue = this.innerText;
+            const newValue = prompt("Entrez une nouvelle valeur pour la cellule", currentValue);
+
+            if (newValue !== null) {
+                fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/update-cell/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRFToken": csrftoken },
+                    body: `row=${rowIndex}&column=${colIndex}&value=${newValue}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        cell.innerText = newValue;
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error("Erreur lors de la mise à jour de la cellule:", error));
+            }
+        });
+    });
+
+    // -------------------- Suppression des lignes --------------------
+    document.getElementById("delete-rows-btn").addEventListener("click", function() {
+        const selectedRows = [];
+        document.querySelectorAll(".row-checkbox:checked").forEach(function(checkbox) {
+            selectedRows.push(checkbox.getAttribute("data-row"));
+        });
+
+        if (selectedRows.length > 0) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer les lignes sélectionnées ?")) {
+                fetch(`/workspace/{{ workspace.id }}/datasets/{{ dataset.id }}/delete-rows/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+                    body: JSON.stringify({ rows: selectedRows })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert("Erreur lors de la suppression des lignes : " + data.message);
+                    }
+                })
+                .catch(error => console.error("Erreur lors de la suppression des lignes:", error));
+            }
+        } else {
+            alert("Veuillez sélectionner au moins une ligne à supprimer.");
+        }
+    });
+});
+
+
+</script>
+
+</body>
+</html>

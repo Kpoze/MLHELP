@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choisir un modèle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+        }
+        select, input, button {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        #target_section {
+            margin-top: 15px;
+        }
+        .result-section {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .alert {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Choisissez votre modèle</h1>
+
+        <!-- Formulaire principal -->
+        <form id="modelForm" method="POST">
+            {% csrf_token %}
+
+            <!-- Choix : Cible ou non -->
+            <div class="mb-3">
+                <label for="is_target" class="form-label">Y a-t-il une cible ?</label>
+                <select class="form-select" name="is_target" id="is_target">
+                    <option value="" disabled {% if not request.session.is_target %}selected{% endif %}>-- Sélectionnez --</option>
+                    <option value="yes" {% if request.session.is_target == 'yes' %}selected{% endif %}>Oui</option>
+                    <option value="no" {% if request.session.is_target == 'no' %}selected{% endif %}>Non</option>
+                </select>
+            </div>
+
+            <!-- Section dynamique pour la cible -->
+            <div class="mb-3" id="target_section" style="display: {% if request.session.is_target == 'yes' %} block {% else %} none {% endif %};">
+                <label for="data_target" class="form-label">Choisissez la colonne cible :</label>
+                <select class="form-select" name="data_target" id="data_target">
+                    <option value="">-- Sélectionner une colonne --</option>
+                    {% for col in columns %}
+                        <option value="{{ col }}" {% if col == request.session.data_target %}selected{% endif %}>{{ col }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Choix du type de modèle -->
+            <div class="mb-3">
+                <label for="model_choosed" class="form-label">Choisissez le type de modèle :</label>
+                <select class="form-select" name="model_choosed" id="model_choosed">
+                    <option value="" disabled {% if not request.session.model_choosed %}selected{% endif %}>-- Sélectionnez un modèle --</option>
+                    <option value="Classification" {% if request.session.model_choosed == 'Classification' %}selected{% endif %}>Classification</option>
+                    <option value="Regression" {% if request.session.model_choosed == 'Regression' %}selected{% endif %}>Régression</option>
+                    <option value="Times_Series" {% if request.session.model_choosed == 'Times_Series' %}selected{% endif %}>Time Series</option>
+                    <option value="Clustering" {% if request.session.model_choosed == 'Clustering' %}selected{% endif %}>Clustering</option>
+                    <option value="Anomalie" {% if request.session.model_choosed == 'Anomalie' %}selected{% endif %}>Anomalie</option>
+                </select>
+            </div>
+
+            <!-- Champ pour nom du modèle -->
+            <div class="mb-3">
+                <label for="model_name" class="form-label">Nom du modèle :</label>
+                <input type="text" class="form-control" name="model_name" id="model_name" placeholder="Entrez un nom pour le modèle" value="{% if request.session.model_name %}{{ request.session.model_name }}{% endif %}">
+            </div>
+
+            <!-- Boutons de soumission -->
+            <button type="submit" class="btn btn-primary" name="action" value="train_model">Entraîner le modèle</button>
+        </form>
+
+        <!-- Résultats de l'entraînement -->
+        {% if best_model %}
+        <div id="result_training" class="result-section mt-4">
+            <h2>Résultats de l'entraînement</h2>
+            <p><strong>Meilleur modèle :</strong> {{ model_name }}</p>
+            <pre><strong>Paramètres :</strong> {{ model_param }}</pre>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-4" id="no_model_message">
+            Aucun modèle n'a encore été entraîné. Veuillez soumettre le formulaire pour commencer.
+        </div>
+        {% endif %}
+
+        <!-- Résultats de l'évaluation -->
+        {% if evaluation_results %}
+        <div id="result_evaluation" class="result-section mt-4">
+            <h2>Résultats de l'évaluation</h2>
+            <pre>{{ evaluation_results }}</pre>
+        </div>
+        {% endif %}
+
+        <!-- Message d'erreur -->
+        {% if error %}
+        <div class="alert alert-danger mt-3">
+            <strong>Erreur :</strong> {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Script JavaScript -->
+    <script>
+        // Fonction pour gérer l'affichage dynamique de la section cible
+        document.getElementById('is_target').addEventListener('change', function() {
+            const targetSection = document.getElementById('target_section');
+            targetSection.style.display = (this.value === 'yes') ? 'block' : 'none';
+        });
+
+        // Gérer les champs "required" dynamiquement en fonction de l'action
+        const modelForm = document.getElementById('modelForm');
+        modelForm.addEventListener('submit', function() {
+            const action = document.querySelector('button[name="action"]').value;
+            const isTarget = document.getElementById('is_target');
+            const modelChoosed = document.getElementById('model_choosed');
+            const dataTarget = document.getElementById('data_target');
+
+            if (action === "train_model") {
+                // Rendre required seulement pour l'entraînement
+                isTarget.setAttribute('required', true);
+                modelChoosed.setAttribute('required', true);
+
+                // Si une colonne cible est nécessaire
+                if (isTarget.value === 'yes') {
+                    dataTarget.setAttribute('required', true);
+                }
+            } else {
+                // Retirer 'required' pour l'évaluation
+                isTarget.removeAttribute('required');
+                modelChoosed.removeAttribute('required');
+                dataTarget.removeAttribute('required');
+            }
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p>Vous êtes connecté !</p>
+    <p>{{ workspace.name }}</p>
+    <ul>
+        {% for dataset in datasets %}
+          <li>
+            <a href="{% url 'datasets:detail_dataset' workspace.id dataset.id %}">{{ dataset.name }}</a>
+            - <a href="{% url 'datasets:update_dataset' workspace.id dataset.id %}">[modifier]</a>
+            - <a href="{% url 'datasets:delete_dataset' workspace.id dataset.id %}">[supprimer]</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p><a href="{% url 'datasets:create_dataset' workspace.id %}">ajouter un dataset</a></p>
+{% endblock content %}
+</body>
+</html>

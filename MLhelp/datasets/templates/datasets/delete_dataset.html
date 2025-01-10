@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Supprimer {{ dataset.name }}</h2>
+  <p>Êtes-vous sûr de vouloir supprimer ce dataset ?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Oui, supprimer</button>
+  </form>
+  <a href="{% url 'datasets:detail_dataset' workspace.id dataset.id %}">Annuler</a>
+{% endblock %}
