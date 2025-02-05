@@ -5,12 +5,12 @@
     <ul>
         {% for model in models %}
           <li>
-            <a href="">{{ model.model_name }}</a>
+            <a href="{% url 'mlapp:model_manip' workspace.id dataset.id model.id %}">{{ model.model_name }}</a>
             - <a href="{% url 'mlapp:delete_model' workspace.id dataset.id model.id %}">[supprimer]</a>
           </li>
         {% endfor %}
       </ul>
-      <p><a href="{% url 'mlapp:get_model' workspace.id dataset.id %}">ajouter un dataset</a></p>
+      <p><a href="{% url 'mlapp:choose_model_way' workspace.id dataset.id %}">ajouter un model</a></p>
 {% endblock content %}
 </body>
 </html>

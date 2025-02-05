@@ -99,15 +99,6 @@
             Aucun modèle n'a encore été entraîné. Veuillez soumettre le formulaire pour commencer.
         </div>
         {% endif %}
-
-        <!-- Résultats de l'évaluation -->
-        {% if evaluation_results %}
-        <div id="result_evaluation" class="result-section mt-4">
-            <h2>Résultats de l'évaluation</h2>
-            <pre>{{ evaluation_results }}</pre>
-        </div>
-        {% endif %}
-
         <!-- Message d'erreur -->
         {% if error %}
         <div class="alert alert-danger mt-3">

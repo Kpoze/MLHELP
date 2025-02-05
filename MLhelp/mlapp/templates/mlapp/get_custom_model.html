@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Column Classification</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        .group {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            min-height: 100px;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .item {
+            padding: 5px;
+            margin: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            cursor: grab;
+        }
+    </style>
+</head>
+<body>
+    <h1>Classify Columns</h1>
+    <div>
+        <form method="post" action="{% url 'mlapp:custom_preprocess_form' workspace.id dataset.id %}">
+            {% csrf_token %}
+            {% for col_type, columns in column_types.items %}
+            <div class="column-group">
+                <h3>{{ col_type }}</h3>
+                <ul id="{{ col_type }}" class="group">
+                    {% for column in columns %}
+                    <li class="item" draggable="true" data-column="{{ column }}">{{ column }}</li>
+                    {% endfor %}
+                </ul>
+        
+                <!-- Champs spécifiques au type de colonne -->
+                <div class="form-fields">
+                    {% if col_type == 'numeric' %}
+                    <label for="scaler_{{ col_type }}">Scaler :</label>
+                    {{ form.scaler }}
+                    <label for="imputer_{{ col_type }}">Imputer :</label>
+                    {{ form.imputer }}
+                    {% elif col_type == 'categorical' %}
+                    <label for="encoder_{{ col_type }}">Encoder :</label>
+                    {{ form.encoder }}
+                    <label for="imputer_{{ col_type }}">Imputer :</label>
+                    {{ form.imputer }}
+                    {% elif col_type == 'text' %}
+                    <label for="vectorizer_{{ col_type }}">Vectorizer :</label>
+                    {{ form.vectorizer }}
+                    {% elif col_type == 'boolean' %}
+                    <label for="encoder_{{ col_type }}">Encoder :</label>
+                    {{ form.encoder }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        
+            <button type="submit">Sauvegarder</button>
+        </form>
+    </div>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Sortable on all groups
+            document.querySelectorAll('.group').forEach(group => {
+                new Sortable(group, {
+                    group: 'columns',
+                    animation: 150
+                });
+
+                // Handle drop events
+                group.addEventListener('drop', function (event) {
+                    event.preventDefault();
+                    const draggedColumn = event.dataTransfer.getData('text'); // Get the dragged column's name
+                    const newType = this.id; // Use the group's ID as the new type
+
+                    // Send POST request to update classifications
+                    fetch("{% url 'mlapp:update_columns' workspace.id dataset.id %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken(),
+                        },
+                        body: JSON.stringify({
+                            column_name: draggedColumn,
+                            new_type: newType,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log("Saved successfully:", data.updated_column_types);
+                        } else {
+                            console.error("Error saving:", data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                });
+
+                // Allow drag over events
+                group.addEventListener('dragover', function (event) {
+                    event.preventDefault();
+                });
+            });
+
+            // Handle dragstart on items
+            document.querySelectorAll('.item').forEach(item => {
+                item.addEventListener('dragstart', function (event) {
+                    event.dataTransfer.setData('text', this.dataset.column); // Set the column name
+                });
+            });
+
+            // Utility function to get CSRF token
+            function getCSRFToken() {
+                return document.querySelector('[name=csrfmiddlewaretoken]').value;
+            }
+        });
+    </script>
+</body>
+</html>

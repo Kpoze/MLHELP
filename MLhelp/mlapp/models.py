@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 class MLModel(models.Model):
     workspace      = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     dataset        = models.ForeignKey(Datasets, on_delete=models.CASCADE)
+    model_type     = models.CharField(max_length=255)
     model_name     = models.CharField(max_length=255)
     model_param    = models.JSONField()  
     model_file     = models.FileField(upload_to='models/')
@@ -16,3 +17,6 @@ class MLModel(models.Model):
 
     def __str__(self):
         return f"{self.model_name} - {self.workspace} - {self.dataframe}"
+    
+
+    

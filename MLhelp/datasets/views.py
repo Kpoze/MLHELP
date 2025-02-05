@@ -116,7 +116,7 @@ def detail_dataset(request, dataset_id, workspace_id):
     
     # Lire le fichier CSV en DataFrame
     df = pd.read_csv(dataset.file.path, encoding=encoding)
-
+    print(df.info())
     # Créer le formulaire avec les données POST (s'il y en a) pour capturer les filtres
     form = FilterColumnForm(request.POST or None)
     # Si le formulaire est valide, appliquer le filtrage

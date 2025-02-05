@@ -19,3 +19,6 @@ class FilterColumnForm(forms.Form):
     ], required=False, help_text="Opérateur de comparaison.")
     value_input = forms.CharField(required=False, help_text="Valeur cible pour le filtre.")
     show_nulls_only = forms.BooleanField(required=False, label="Afficher uniquement les valeurs nulles")  # Nouveau champ
+
+
+    
