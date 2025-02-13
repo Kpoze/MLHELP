@@ -1,289 +1,289 @@
-adagio==0.2.6
-aiofiles==23.2.1
-alembic==1.14.0
-annotated-types==0.7.0
-ansi2html==1.9.2
-antlr4-python3-runtime==4.11.1
-anyio==4.7.0
 aplr==10.8.0
-appdirs==1.4.4
-asgiref==3.8.1
-asttokens==3.0.0
-attrs==24.2.0
 beautifulsoup4==4.12.3
-blinker==1.9.0
-boto3==1.35.76
-botocore==1.35.76
-cachetools==5.5.0
 catboost==1.2.7
-category-encoders==2.6.4
-certifi==2024.8.30
-cffi==1.17.1
 chardet==5.2.0
-charset-normalizer==3.4.0
-click==8.1.7
-cloudpickle==3.1.0
-colorama==0.4.6
-colorlog==6.9.0
-colour==0.1.5
-comm==0.2.2
-contourpy==1.3.0
-cryptography==44.0.0
-cycler==0.12.1
-Cython==3.0.11
-daal==2025.0.0
-dacite==1.8.1
-dash==2.18.2
-dash-bootstrap-components==1.6.0
-dash-core-components==2.0.0
-dash-html-components==2.0.0
-dash-table==5.0.0
+dash-cytoscape==1.0.2
 dash-testing-stub==0.0.2
-dash_auth==2.3.0
-dash_cytoscape==1.0.2
-dask==2024.12.0
 dask-expr==1.1.20
-databricks-sdk==0.38.0
-debugpy==1.8.9
-decorator==5.1.1
-Deprecated==1.2.15
-deprecation==2.1.0
-dill==0.3.9
 distributed==2024.12.0
-distro==1.9.0
-Django==5.1.1
 djangorestframework==3.15.2
-docker==7.1.0
-dtreeviz==2.2.2
-dynaconf==3.2.6
 evidently==0.4.40
-exceptiongroup==1.2.2
-executing==2.1.0
 explainerdashboard==0.4.7
 fairlearn==0.7.0
-Faker==33.1.0
-fastapi==0.115.6
-fastjsonschema==2.21.1
-ffmpy==0.4.0
-filelock==3.16.1
-Flask==2.3.3
-Flask-WTF==1.2.2
-flask_simplelogin==0.2.0
-fonttools==4.54.1
-fs==2.4.16
-fsspec==2024.9.0
-fugue==0.8.7
-fugue-sql-antlr==0.2.2
-future==1.0.0
 gevent==24.11.1
-gitdb==4.0.11
-GitPython==3.1.43
-google-auth==2.36.0
 gradio==5.8.0
-gradio_client==1.5.1
-graphene==3.4.3
-graphql-core==3.2.5
-graphql-relay==3.2.0
-graphviz==0.20.3
-greenlet==3.1.1
-h11==0.14.0
-htmlmin==0.1.12
-httpcore==1.0.7
 httptools==0.6.4
-httpx==0.28.1
-huggingface-hub==0.26.5
 hyperopt==0.2.7
-idna==3.10
-ImageHash==4.3.1
-imbalanced-learn==0.12.4
-importlib_metadata==8.5.0
-iniconfig==2.0.0
 interpret==0.6.7
-interpret-core==0.6.7
-ipykernel==6.29.5
-ipython==8.30.0
-ipywidgets==8.1.5
-iterative-telemetry==0.0.9
-itsdangerous==2.2.0
-jedi==0.19.2
-Jinja2==3.1.4
-jmespath==1.0.1
-joblib==1.3.2
-jsonschema==4.23.0
-jsonschema-specifications==2024.10.1
-jupyter-dash==0.4.2
-jupyter_client==8.6.3
-jupyter_core==5.7.2
-jupyterlab_widgets==3.0.13
-kaleido==0.2.1
-kiwisolver==1.4.7
 kmodes==0.12.2
-lightgbm==4.5.0
-litestar==2.13.0
-litestar-htmx==0.4.1
-llvmlite==0.43.0
-locket==1.0.0
 lxml==5.3.0
 m2cgen==0.10.0
-Mako==1.3.8
-Markdown==3.7
-markdown-it-py==3.0.0
-MarkupSafe==2.1.5
-matplotlib==3.7.5
-matplotlib-inline==0.1.7
-mdurl==0.1.2
 mlflow==2.18.0
-mlflow-skinny==2.18.0
 mlxtend==0.23.3
 moto==4.2.14
-msgpack==1.1.0
-msgspec==0.18.6
-multidict==6.1.0
-multimethod==1.12
-multiprocess==0.70.17
-mypy-extensions==1.0.0
-nbformat==5.10.4
-nest-asyncio==1.6.0
-networkx==3.4.2
-nltk==3.9.1
-numba==0.60.0
-numpy==1.26.4
-opentelemetry-api==1.28.2
-opentelemetry-sdk==1.28.2
-opentelemetry-semantic-conventions==0.49b2
-optuna==4.1.0
 optuna-integration==4.1.0
-orjson==3.10.12
-outcome==1.3.0.post0
-oyaml==1.0
-packaging==24.2
-pandas==2.1.4
-parso==0.8.4
-partd==1.4.2
-patsy==1.0.1
 percy==2.0.2
-phik==0.12.4
-pillow==10.4.0
-platformdirs==4.3.6
-plotly==5.24.1
-plotly-resampler==0.10.0
-pluggy==1.5.0
-pmdarima==2.0.4
-polyfactory==2.18.1
-prompt_toolkit==3.0.48
-protobuf==5.29.1
-psutil==6.1.0
-pure_eval==0.2.3
-py4j==0.10.9.7
-pyaml==24.9.0
-pyarrow==18.1.0
-pyasn1==0.6.1
-pyasn1_modules==0.4.1
 pycaret==3.3.2
-pycparser==2.22
-pydantic==2.10.3
-pydantic_core==2.27.1
-pydub==0.25.1
-Pygments==2.18.0
-pynndescent==0.5.13
-pyod==2.0.2
-pyOpenSSL==24.3.0
-pyparsing==3.2.0
-PySocks==1.7.1
-pytest==7.4.4
-python-dateutil==2.9.0.post0
+pyopenssl==24.3.0
+pysocks==1.7.1
 python-dotenv==1.0.1
-python-multipart==0.0.19
-pytz==2024.2
-PyWavelets==1.8.0
-pywin32==308
-PyYAML==6.0.2
-pyzmq==26.2.0
-qpd==0.4.4
-referencing==0.35.1
-regex==2024.11.6
-requests==2.32.3
-responses==0.25.3
-retrying==1.3.4
-rich==13.9.4
-rich-click==1.8.5
-rpds-py==0.22.3
-rsa==4.9
-ruff==0.8.2
-s3transfer==0.10.4
-safehttpx==0.1.6
-SALib==1.5.1
-schemdraw==0.15
-scikit-base==0.7.8
-scikit-learn==1.4.2
+salib==1.5.1
 scikit-learn-intelex==2025.0.0
 scikit-optimize==0.10.2
-scikit-plot==0.3.7
-scipy==1.11.4
-seaborn==0.13.2
 selenium==4.2.0
-semantic-version==2.10.0
-shap==0.44.1
-shellingham==1.5.4
-six==1.16.0
-sktime==0.26.0
-slicer==0.0.7
-smmap==5.0.1
-sniffio==1.3.1
-sortedcontainers==2.4.0
-soupsieve==2.6
-SQLAlchemy==2.0.36
-sqlglot==25.34.0
-sqlparse==0.5.1
-stack-data==0.6.3
-starlette==0.41.3
 statsforecast==1.5.0
-statsmodels==0.14.4
-tbats==1.1.3
-tbb==2022.0.0
-tblib==3.0.0
-tcmlib==1.2.0
-tenacity==9.0.0
-threadpoolctl==3.5.0
-tomli==2.2.1
-tomlkit==0.13.2
-toolz==1.0.0
-tornado==6.4.2
-tqdm==4.67.1
-traitlets==5.14.3
-triad==0.9.8
-trio==0.27.0
-trio-websocket==0.11.1
-tsdownsample==0.1.3
-typeguard==4.4.1
-typer==0.15.1
-typing-inspect==0.9.0
-typing_extensions==4.12.2
-tzdata==2024.2
-ujson==5.10.0
 umap-learn==0.5.7
-urllib3==1.26.20
 urllib3-secure-extra==0.1.0
-uuid6==2024.7.10
-uvicorn==0.32.1
-visions==0.7.6
-waitress==3.0.2
-watchdog==6.0.0
 watchfiles==1.0.0
-wcwidth==0.2.13
-websockets==14.1
-Werkzeug==2.3.8
-widgetsnbextension==4.0.13
-wordcloud==1.9.4
-wrapt==1.17.0
-wsproto==1.2.0
-WTForms==3.2.1
 xgboost==2.1.3
-xmltodict==0.14.2
-xxhash==3.5.0
 ydata-profiling==4.12.1
-yellowbrick==1.5
-zict==3.0.0
-zipp==3.21.0
-zope.event==5.0
-zope.interface==7.2
+# adagio==0.2.6 # Installed as dependency for fugue, qpd
+# aiofiles==23.2.1 # Installed as dependency for gradio
+# alembic==1.14.0 # Installed as dependency for mlflow, optuna
+# annotated-types==0.7.0 # Installed as dependency for pydantic
+# ansi2html==1.9.2 # Installed as dependency for jupyter-dash
+# antlr4-python3-runtime==4.11.1 # Installed as dependency for fugue-sql-antlr, qpd
+# anyio==4.7.0 # Installed as dependency for gradio, httpx, litestar, starlette, watchfiles
+# appdirs==1.4.4 # Installed as dependency for fs, iterative-telemetry
+# asgiref==3.8.1 # Installed as dependency for django
+# asttokens==3.0.0 # Installed as dependency for stack-data
+# attrs==24.2.0 # Installed as dependency for jsonschema, outcome, referencing, trio, visions
+# blinker==1.9.0 # Installed as dependency for flask
+# boto3==1.35.76 # Installed as dependency for moto
+# botocore==1.35.76 # Installed as dependency for boto3, moto, s3transfer
+# cachetools==5.5.0 # Installed as dependency for google-auth, mlflow-skinny
+# category-encoders==2.6.4 # Installed as dependency for pycaret
+# certifi==2024.8.30 # Installed as dependency for evidently, httpcore, httpx, requests
+# cffi==1.17.1 # Installed as dependency for cryptography, gevent, trio
+# charset-normalizer==3.4.0 # Installed as dependency for requests
+# click==8.1.7 # Installed as dependency for dask, distributed, explainerdashboard, flask, flask-simplelogin, litestar, mlflow-skinny, nltk, rich-click, typer, uvicorn
+# cloudpickle==3.1.0 # Installed as dependency for dask, distributed, hyperopt, mlflow-skinny, pycaret, shap
+# colorama==0.4.6 # Installed as dependency for click, colorlog, ipython, pytest, tqdm
+# colorlog==6.9.0 # Installed as dependency for optuna
+# colour==0.1.5 # Installed as dependency for dtreeviz
+# comm==0.2.2 # Installed as dependency for ipykernel, ipywidgets
+# contourpy==1.3.0 # Installed as dependency for matplotlib
+# cryptography==44.0.0 # Installed as dependency for evidently, moto, pyopenssl
+# cycler==0.12.1 # Installed as dependency for matplotlib, yellowbrick
+# cython==3.0.11 # Installed as dependency for pmdarima
+# daal==2025.0.0 # Installed as dependency for scikit-learn-intelex
+# dacite==1.8.1 # Installed as dependency for ydata-profiling
+# dash==2.18.2 # Installed as dependency for dash-auth, dash-bootstrap-components, dash-cytoscape, explainerdashboard, jupyter-dash, plotly-resampler
+# dash-auth==2.3.0 # Installed as dependency for explainerdashboard
+# dash-bootstrap-components==1.6.0 # Installed as dependency for explainerdashboard
+# dash-core-components==2.0.0 # Installed as dependency for dash
+# dash-html-components==2.0.0 # Installed as dependency for dash
+# dash-table==5.0.0 # Installed as dependency for dash
+# dask==2024.12.0 # Installed as dependency for dask-expr, distributed
+# databricks-sdk==0.38.0 # Installed as dependency for mlflow-skinny
+# debugpy==1.8.9 # Installed as dependency for ipykernel
+# decorator==5.1.1 # Installed as dependency for ipython
+# deprecated==1.2.15 # Installed as dependency for opentelemetry-api, opentelemetry-semantic-conventions
+# deprecation==2.1.0 # Installed as dependency for evidently, pycaret
+# dill==0.3.9 # Installed as dependency for multiprocess
+# distro==1.9.0 # Installed as dependency for iterative-telemetry
+# django==5.1.1 # Installed as dependency for djangorestframework
+# docker==7.1.0 # Installed as dependency for mlflow
+# dtreeviz==2.2.2 # Installed as dependency for explainerdashboard
+# dynaconf==3.2.6 # Installed as dependency for evidently
+# exceptiongroup==1.2.2 # Installed as dependency for anyio, ipython, litestar, pytest, trio, trio-websocket
+# executing==2.1.0 # Installed as dependency for stack-data
+# faker==33.1.0 # Installed as dependency for polyfactory
+# fastapi==0.115.6 # Installed as dependency for gradio
+# fastjsonschema==2.21.1 # Installed as dependency for nbformat
+# ffmpy==0.4.0 # Installed as dependency for gradio
+# filelock==3.16.1 # Installed as dependency for huggingface-hub, iterative-telemetry
+# flask==2.3.3 # Installed as dependency for dash, dash-auth, flask-simplelogin, flask-wtf, jupyter-dash, mlflow
+# flask-simplelogin==0.2.0 # Installed as dependency for explainerdashboard
+# flask-wtf==1.2.2 # Installed as dependency for explainerdashboard, flask-simplelogin
+# fonttools==4.54.1 # Installed as dependency for matplotlib
+# fs==2.4.16 # Installed as dependency for triad
+# fsspec==2024.9.0 # Installed as dependency for dask, evidently, gradio-client, huggingface-hub, triad
+# fugue==0.8.7 # Installed as dependency for statsforecast
+# fugue-sql-antlr==0.2.2 # Installed as dependency for fugue
+# future==1.0.0 # Installed as dependency for hyperopt
+# gitdb==4.0.11 # Installed as dependency for gitpython
+# gitpython==3.1.43 # Installed as dependency for mlflow-skinny
+# google-auth==2.36.0 # Installed as dependency for databricks-sdk
+# gradio-client==1.5.1 # Installed as dependency for gradio
+# graphene==3.4.3 # Installed as dependency for mlflow
+# graphql-core==3.2.5 # Installed as dependency for graphene, graphql-relay
+# graphql-relay==3.2.0 # Installed as dependency for graphene
+# graphviz==0.20.3 # Installed as dependency for catboost, dtreeviz, explainerdashboard
+# greenlet==3.1.1 # Installed as dependency for gevent, sqlalchemy
+# h11==0.14.0 # Installed as dependency for httpcore, uvicorn, wsproto
+# htmlmin==0.1.12 # Installed as dependency for ydata-profiling
+# httpcore==1.0.7 # Installed as dependency for httpx
+# httpx==0.28.1 # Installed as dependency for gradio, gradio-client, litestar, safehttpx
+# huggingface-hub==0.26.5 # Installed as dependency for gradio, gradio-client
+# idna==3.10 # Installed as dependency for anyio, httpx, requests, trio
+# imagehash==4.3.1 # Installed as dependency for ydata-profiling
+# imbalanced-learn==0.12.4 # Installed as dependency for pycaret
+# importlib-metadata==8.5.0 # Installed as dependency for dash, dask, mlflow-skinny, opentelemetry-api, pycaret
+# iniconfig==2.0.0 # Installed as dependency for pytest
+# interpret-core==0.6.7 # Installed as dependency for interpret
+# ipykernel==6.29.5 # Installed as dependency for jupyter-dash
+# ipython==8.30.0 # Installed as dependency for ipykernel, ipywidgets, jupyter-dash, pycaret
+# ipywidgets==8.1.5 # Installed as dependency for pycaret
+# iterative-telemetry==0.0.9 # Installed as dependency for evidently
+# itsdangerous==2.2.0 # Installed as dependency for flask, flask-wtf
+# jedi==0.19.2 # Installed as dependency for ipython
+# jinja2==3.1.4 # Installed as dependency for distributed, flask, fugue, fugue-sql-antlr, gradio, mlflow, moto, pycaret, ydata-profiling
+# jmespath==1.0.1 # Installed as dependency for boto3, botocore
+# joblib==1.3.2 # Installed as dependency for explainerdashboard, imbalanced-learn, interpret-core, kmodes, mlxtend, nltk, phik, pmdarima, pycaret, pynndescent, pyod, scikit-learn, scikit-optimize, scikit-plot
+# jsonschema==4.23.0 # Installed as dependency for nbformat
+# jsonschema-specifications==2024.10.1 # Installed as dependency for jsonschema
+# jupyter-client==8.6.3 # Installed as dependency for ipykernel
+# jupyter-core==5.7.2 # Installed as dependency for ipykernel, jupyter-client, nbformat
+# jupyter-dash==0.4.2 # Installed as dependency for explainerdashboard
+# jupyterlab-widgets==3.0.13 # Installed as dependency for ipywidgets
+# kaleido==0.2.1 # Installed as dependency for pycaret
+# kiwisolver==1.4.7 # Installed as dependency for matplotlib
+# lightgbm==4.5.0 # Installed as dependency for pycaret
+# litestar==2.13.0 # Installed as dependency for evidently
+# litestar-htmx==0.4.1 # Installed as dependency for litestar
+# llvmlite==0.43.0 # Installed as dependency for numba, pynndescent
+# locket==1.0.0 # Installed as dependency for distributed, partd
+# mako==1.3.8 # Installed as dependency for alembic
+# markdown==3.7 # Installed as dependency for mlflow
+# markdown-it-py==3.0.0 # Installed as dependency for rich
+# markupsafe==2.1.5 # Installed as dependency for gradio, jinja2, mako, pycaret, werkzeug, wtforms
+# matplotlib==3.7.5 # Installed as dependency for catboost, dtreeviz, mlflow, mlxtend, phik, pycaret, pyod, salib, scikit-plot, seaborn, statsforecast, wordcloud, ydata-profiling, yellowbrick
+# matplotlib-inline==0.1.7 # Installed as dependency for ipykernel, ipython
+# mdurl==0.1.2 # Installed as dependency for markdown-it-py
+# mlflow-skinny==2.18.0 # Installed as dependency for mlflow
+# msgpack==1.1.0 # Installed as dependency for distributed
+# msgspec==0.18.6 # Installed as dependency for litestar
+# multidict==6.1.0 # Installed as dependency for litestar
+# multimethod==1.12 # Installed as dependency for visions, ydata-profiling
+# multiprocess==0.70.17 # Installed as dependency for salib
+# mypy-extensions==1.0.0 # Installed as dependency for typing-inspect
+# nbformat==5.10.4 # Installed as dependency for pycaret
+# nest-asyncio==1.6.0 # Installed as dependency for dash, ipykernel, jupyter-dash
+# networkx==3.4.2 # Installed as dependency for hyperopt, visions
+# nltk==3.9.1 # Installed as dependency for evidently
+# numba==0.60.0 # Installed as dependency for pycaret, pynndescent, pyod, shap, statsforecast, umap-learn, ydata-profiling
+# numpy==1.26.4 # Installed as dependency for aplr, catboost, category-encoders, contourpy, dtreeviz, evidently, explainerdashboard, fairlearn, gradio, hyperopt, imagehash, imbalanced-learn, interpret-core, kmodes, lightgbm, m2cgen, matplotlib, mlflow, mlxtend, numba, optuna, pandas, patsy, phik, plotly-resampler, pmdarima, pycaret, pyod, pywavelets, salib, scikit-learn, scikit-learn-intelex, scikit-optimize, scipy, seaborn, shap, sktime, statsforecast, statsmodels, tbats, triad, tsdownsample, umap-learn, visions, wordcloud, xgboost, ydata-profiling, yellowbrick
+# opentelemetry-api==1.28.2 # Installed as dependency for mlflow-skinny, opentelemetry-sdk, opentelemetry-semantic-conventions
+# opentelemetry-sdk==1.28.2 # Installed as dependency for mlflow-skinny
+# opentelemetry-semantic-conventions==0.49b2 # Installed as dependency for opentelemetry-sdk
+# optuna==4.1.0 # Installed as dependency for optuna-integration
+# orjson==3.10.12 # Installed as dependency for gradio, plotly-resampler
+# outcome==1.3.0.post0 # Installed as dependency for trio
+# oyaml==1.0 # Installed as dependency for explainerdashboard
+# packaging==24.2 # Installed as dependency for dask, deprecation, distributed, fugue-sql-antlr, gradio, gradio-client, huggingface-hub, ipykernel, matplotlib, mlflow-skinny, optuna, plotly, pmdarima, pytest, scikit-optimize, shap, sktime, statsmodels
+# pandas==2.1.4 # Installed as dependency for catboost, category-encoders, dask-expr, dtreeviz, evidently, explainerdashboard, fairlearn, gradio, interpret-core, mlflow, mlxtend, phik, plotly-resampler, pmdarima, pycaret, qpd, salib, seaborn, shap, sktime, statsforecast, statsmodels, triad, visions, ydata-profiling
+# parso==0.8.4 # Installed as dependency for jedi
+# partd==1.4.2 # Installed as dependency for dask
+# patsy==1.0.1 # Installed as dependency for category-encoders, statsmodels
+# phik==0.12.4 # Installed as dependency for ydata-profiling
+# pillow==10.4.0 # Installed as dependency for gradio, imagehash, matplotlib, wordcloud
+# platformdirs==4.3.6 # Installed as dependency for jupyter-core
+# plotly==5.24.1 # Installed as dependency for catboost, dash, evidently, plotly-resampler, pycaret, statsforecast
+# plotly-resampler==0.10.0 # Installed as dependency for pycaret, statsforecast
+# pluggy==1.5.0 # Installed as dependency for pytest
+# pmdarima==2.0.4 # Installed as dependency for pycaret, tbats
+# polyfactory==2.18.1 # Installed as dependency for litestar
+# prompt-toolkit==3.0.48 # Installed as dependency for ipython
+# protobuf==5.29.1 # Installed as dependency for mlflow-skinny
+# psutil==6.1.0 # Installed as dependency for distributed, ipykernel, pycaret
+# pure-eval==0.2.3 # Installed as dependency for stack-data
+# py4j==0.10.9.7 # Installed as dependency for hyperopt
+# pyaml==24.9.0 # Installed as dependency for scikit-optimize
+# pyarrow==18.1.0 # Installed as dependency for dask-expr, mlflow, triad
+# pyasn1==0.6.1 # Installed as dependency for pyasn1-modules, rsa
+# pyasn1-modules==0.4.1 # Installed as dependency for google-auth
+# pycparser==2.22 # Installed as dependency for cffi
+# pydantic==2.10.3 # Installed as dependency for evidently, fastapi, gradio, ydata-profiling
+# pydantic-core==2.27.1 # Installed as dependency for pydantic
+# pydub==0.25.1 # Installed as dependency for gradio
+# pygments==2.18.0 # Installed as dependency for ipython, rich
+# pynndescent==0.5.13 # Installed as dependency for umap-learn
+# pyod==2.0.2 # Installed as dependency for pycaret
+# pyparsing==3.2.0 # Installed as dependency for matplotlib
+# pytest==7.4.4 # Installed as dependency for dtreeviz
+# python-dateutil==2.9.0.post0 # Installed as dependency for botocore, faker, graphene, jupyter-client, matplotlib, moto, pandas
+# python-multipart==0.0.19 # Installed as dependency for gradio
+# pytz==2024.2 # Installed as dependency for pandas
+# pywavelets==1.8.0 # Installed as dependency for imagehash
+# pywin32==308 # Installed as dependency for docker, jupyter-core
+# pyyaml==6.0.2 # Installed as dependency for dask, distributed, evidently, gradio, huggingface-hub, litestar, mlflow-skinny, optuna, oyaml, pyaml, responses, ydata-profiling
+# pyzmq==26.2.0 # Installed as dependency for ipykernel, jupyter-client
+# qpd==0.4.4 # Installed as dependency for fugue
+# referencing==0.35.1 # Installed as dependency for jsonschema, jsonschema-specifications
+# regex==2024.11.6 # Installed as dependency for nltk
+# requests==2.32.3 # Installed as dependency for dash, databricks-sdk, docker, evidently, huggingface-hub, iterative-telemetry, jupyter-dash, mlflow-skinny, moto, percy, pycaret, responses, ydata-profiling
+# responses==0.25.3 # Installed as dependency for moto
+# retrying==1.3.4 # Installed as dependency for dash, jupyter-dash
+# rich==13.9.4 # Installed as dependency for evidently, litestar, rich-click, typer
+# rich-click==1.8.5 # Installed as dependency for litestar
+# rpds-py==0.22.3 # Installed as dependency for jsonschema, referencing
+# rsa==4.9 # Installed as dependency for google-auth
+# ruff==0.8.2 # Installed as dependency for gradio
+# s3transfer==0.10.4 # Installed as dependency for boto3
+# safehttpx==0.1.6 # Installed as dependency for gradio
+# schemdraw==0.15 # Installed as dependency for pycaret
+# scikit-base==0.7.8 # Installed as dependency for sktime
+# scikit-learn==1.4.2 # Installed as dependency for category-encoders, dtreeviz, evidently, explainerdashboard, fairlearn, imbalanced-learn, interpret-core, kmodes, mlflow, mlxtend, pmdarima, pycaret, pynndescent, pyod, scikit-learn-intelex, scikit-optimize, scikit-plot, shap, sktime, tbats, umap-learn, yellowbrick
+# scikit-plot==0.3.7 # Installed as dependency for pycaret
+# scipy==1.11.4 # Installed as dependency for catboost, category-encoders, evidently, fairlearn, hyperopt, imagehash, imbalanced-learn, kmodes, lightgbm, mlflow, mlxtend, phik, pmdarima, pycaret, pynndescent, pyod, salib, scikit-learn, scikit-optimize, scikit-plot, shap, sktime, statsforecast, statsmodels, tbats, umap-learn, xgboost, ydata-profiling, yellowbrick
+# seaborn==0.13.2 # Installed as dependency for ydata-profiling
+# semantic-version==2.10.0 # Installed as dependency for gradio
+# shap==0.44.1 # Installed as dependency for explainerdashboard
+# shellingham==1.5.4 # Installed as dependency for typer
+# six==1.16.0 # Installed as dependency for catboost, fs, hyperopt, python-dateutil, retrying, triad
+# sktime==0.26.0 # Installed as dependency for pycaret
+# slicer==0.0.7 # Installed as dependency for shap
+# smmap==5.0.1 # Installed as dependency for gitdb
+# sniffio==1.3.1 # Installed as dependency for anyio, trio
+# sortedcontainers==2.4.0 # Installed as dependency for distributed, trio
+# soupsieve==2.6 # Installed as dependency for beautifulsoup4
+# sqlalchemy==2.0.36 # Installed as dependency for alembic, mlflow, optuna
+# sqlglot==25.34.0 # Installed as dependency for fugue
+# sqlparse==0.5.1 # Installed as dependency for django, mlflow-skinny
+# stack-data==0.6.3 # Installed as dependency for ipython
+# starlette==0.41.3 # Installed as dependency for fastapi, gradio
+# statsmodels==0.14.4 # Installed as dependency for category-encoders, evidently, pmdarima, pycaret, statsforecast, ydata-profiling
+# tbats==1.1.3 # Installed as dependency for pycaret
+# tbb==2022.0.0 # Installed as dependency for daal
+# tblib==3.0.0 # Installed as dependency for distributed
+# tcmlib==1.2.0 # Installed as dependency for tbb
+# tenacity==9.0.0 # Installed as dependency for plotly
+# threadpoolctl==3.5.0 # Installed as dependency for imbalanced-learn, scikit-learn
+# tomli==2.2.1 # Installed as dependency for pytest
+# tomlkit==0.13.2 # Installed as dependency for gradio
+# toolz==1.0.0 # Installed as dependency for dask, distributed, partd
+# tornado==6.4.2 # Installed as dependency for distributed, ipykernel, jupyter-client
+# tqdm==4.67.1 # Installed as dependency for huggingface-hub, hyperopt, nltk, optuna, pycaret, shap, statsforecast, umap-learn, ydata-profiling
+# traitlets==5.14.3 # Installed as dependency for comm, ipykernel, ipython, ipywidgets, jupyter-client, jupyter-core, matplotlib-inline, nbformat
+# triad==0.9.8 # Installed as dependency for adagio, fugue, fugue-sql-antlr, qpd
+# trio==0.27.0 # Installed as dependency for selenium, trio-websocket
+# trio-websocket==0.11.1 # Installed as dependency for selenium
+# tsdownsample==0.1.3 # Installed as dependency for plotly-resampler
+# typeguard==4.4.1 # Installed as dependency for ydata-profiling
+# typer==0.15.1 # Installed as dependency for evidently, gradio
+# typing-extensions==4.12.2 # Installed as dependency for alembic, anyio, asgiref, dash, faker, fastapi, gradio, gradio-client, graphene, huggingface-hub, ipython, litestar, multidict, opentelemetry-sdk, polyfactory, pydantic, pydantic-core, rich, rich-click, sqlalchemy, typeguard, typer, typing-inspect, uvicorn
+# typing-inspect==0.9.0 # Installed as dependency for evidently
+# tzdata==2024.2 # Installed as dependency for django, pandas
+# ujson==5.10.0 # Installed as dependency for evidently
+# urllib3==1.26.20 # Installed as dependency for botocore, distributed, docker, evidently, pmdarima, requests, responses, selenium
+# uuid6==2024.7.10 # Installed as dependency for evidently
+# uvicorn==0.32.1 # Installed as dependency for evidently, gradio
+# visions==0.7.6 # Installed as dependency for ydata-profiling
+# waitress==3.0.2 # Installed as dependency for explainerdashboard, mlflow
+# watchdog==6.0.0 # Installed as dependency for evidently
+# wcwidth==0.2.13 # Installed as dependency for prompt-toolkit
+# websockets==14.1 # Installed as dependency for gradio-client
+# werkzeug==2.3.8 # Installed as dependency for dash, dash-auth, flask, moto
+# widgetsnbextension==4.0.13 # Installed as dependency for ipywidgets
+# wordcloud==1.9.4 # Installed as dependency for ydata-profiling
+# wrapt==1.17.0 # Installed as dependency for deprecated
+# wsproto==1.2.0 # Installed as dependency for trio-websocket
+# wtforms==3.2.1 # Installed as dependency for flask-simplelogin, flask-wtf
+# xmltodict==0.14.2 # Installed as dependency for moto
+# xxhash==3.5.0 # Installed as dependency for pycaret
+# yellowbrick==1.5 # Installed as dependency for pycaret
+# zict==3.0.0 # Installed as dependency for distributed
+# zipp==3.21.0 # Installed as dependency for importlib-metadata
+# zope.event==5.0 # Installed as dependency for gevent
+# zope.interface==7.2 # Installed as dependency for gevent
