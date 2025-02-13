@@ -1,129 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Column Classification</title>
+    <title>Configuration du Modèle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Ajout de jQuery pour AJAX -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         .group {
             border: 1px solid #ccc;
             padding: 10px;
-            margin: 10px;
-            width: 200px;
-            min-height: 100px;
-            display: inline-block;
-            vertical-align: top;
+            margin-bottom: 10px;
+            min-height: 50px;
         }
         .item {
             padding: 5px;
             margin: 5px;
-            background-color: #f0f0f0;
+            background-color: #f8f9fa;
             border: 1px solid #ddd;
             cursor: grab;
+        }
+        .item:active {
+            cursor: grabbing;
         }
     </style>
 </head>
 <body>
-    <h1>Classify Columns</h1>
-    <div>
-        <form method="post" action="{% url 'mlapp:custom_preprocess_form' workspace.id dataset.id %}">
-            {% csrf_token %}
-            {% for col_type, columns in column_types.items %}
-            <div class="column-group">
-                <h3>{{ col_type }}</h3>
-                <ul id="{{ col_type }}" class="group">
-                    {% for column in columns %}
-                    <li class="item" draggable="true" data-column="{{ column }}">{{ column }}</li>
-                    {% endfor %}
-                </ul>
-        
-                <!-- Champs spécifiques au type de colonne -->
-                <div class="form-fields">
-                    {% if col_type == 'numeric' %}
-                    <label for="scaler_{{ col_type }}">Scaler :</label>
-                    {{ form.scaler }}
-                    <label for="imputer_{{ col_type }}">Imputer :</label>
-                    {{ form.imputer }}
-                    {% elif col_type == 'categorical' %}
-                    <label for="encoder_{{ col_type }}">Encoder :</label>
-                    {{ form.encoder }}
-                    <label for="imputer_{{ col_type }}">Imputer :</label>
-                    {{ form.imputer }}
-                    {% elif col_type == 'text' %}
-                    <label for="vectorizer_{{ col_type }}">Vectorizer :</label>
-                    {{ form.vectorizer }}
-                    {% elif col_type == 'boolean' %}
-                    <label for="encoder_{{ col_type }}">Encoder :</label>
-                    {{ form.encoder }}
-                    {% endif %}
-                </div>
+    <div class="container mt-5">
+        <h1 class="text-center">Configuration du Modèle</h1>
+        <p class="text-center">Workspace: <strong>{{ workspace.name }}</strong> | Dataset: <strong>{{ dataset.name }}</strong></p>
+
+        <!-- Barre de progression des étapes -->
+        <div class="progress mt-4">
+            <div class="progress-bar bg-success" role="progressbar" 
+                 aria-valuenow="{{ current_step }}" 
+                 aria-valuemin="1" 
+                 aria-valuemax="5">
+                Étape {{ current_step }} / 5
             </div>
-            {% endfor %}
-        
-            <button type="submit">Sauvegarder</button>
-        </form>
-    </div>
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Sortable on all groups
-            document.querySelectorAll('.group').forEach(group => {
-                new Sortable(group, {
-                    group: 'columns',
-                    animation: 150
-                });
+        <!-- Contenu de l'étape actuelle -->
+        <div class="tab-content mt-4">
+            <a href="?reset=1" class="btn btn-danger">🔄 Réinitialiser</a>
+            <form method="POST">
+                {% csrf_token %}
+                        <!-- Étape 1 : Sélection de la cible -->
+                        {% if current_step == 1 %}
+                                    <!-- Choix : Cible ou non -->
+                            <div class="mb-3">
+                                <label for="is_target" class="form-label">Y a-t-il une cible ?</label>
+                                <select class="form-select" name="is_target" id="is_target">
+                                    <option value="" disabled {% if not request.session.is_target %}selected{% endif %}>-- Sélectionnez --</option>
+                                    <option value="yes" {% if request.session.is_target == 'yes' %}selected{% endif %}>Oui</option>
+                                    <option value="no" {% if request.session.is_target == 'no' %}selected{% endif %}>Non</option>
+                                </select>
+                            </div>
 
-                // Handle drop events
-                group.addEventListener('drop', function (event) {
-                    event.preventDefault();
-                    const draggedColumn = event.dataTransfer.getData('text'); // Get the dragged column's name
-                    const newType = this.id; // Use the group's ID as the new type
+                            <!-- Section dynamique pour la cible -->
+                            <div class="mb-3" id="target_section" style="display: {% if request.session.is_target == 'yes' %} block {% else %} none {% endif %};">
+                                <label for="data_target" class="form-label">Choisissez la colonne cible :</label>
+                                <select class="form-select" name="data_target" id="data_target">
+                                    <option value="">-- Sélectionner une colonne --</option>
+                                    {% for col in columns %}
+                                        <option value="{{ col }}" {% if col == request.session.data_target %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </div>
+                            {% endif %}
+                                        <!-- Étape 2 : Préprocessing -->
+                        {% if current_step == 2 %}
+                        <h2>Préprocessing des données</h2>
+                        <div>
+                            <form method="post" action="{% url 'mlapp:get_custom_model' workspace.id dataset.id %}">
+                                {% csrf_token %}
+                    
+                                {% for col_type, columns in column_types.items %}
+                                <div class="column-group">
+                                    <h3>{{ col_type }}</h3>
+                                    <ul id="{{ col_type }}" class="group" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        {% for column in columns %}
+                                        <li class="item" draggable="true" ondragstart="drag(event)" data-column="{{ column }}">{{ column }}</li>
+                                        {% endfor %}
+                                    </ul>
+                    
+                                    <!-- Champs spécifiques au type de colonne -->
+                                    <div class="form-fields">
+                                        {% if col_type == 'numeric' %}
+                                        <label for="scaler_{{ col_type }}">Scaler :</label>
+                                        {{ form.scaler }}
+                                        <label for="imputer_{{ col_type }}">Imputer :</label>
+                                        {{ form.imputer }}
+                                        {% elif col_type == 'categorical' %}
+                                        <label for="encoder_{{ col_type }}">Encoder :</label>
+                                        {{ form.encoder }}
+                                        <label for="imputer_{{ col_type }}">Imputer :</label>
+                                        {{ form.imputer }}
+                                        {% elif col_type == 'text' %}
+                                        <label for="vectorizer_{{ col_type }}">Vectorizer :</label>
+                                        {{ form.vectorizer }}
+                                        {% elif col_type == 'boolean' %}
+                                        <label for="encoder_{{ col_type }}">Encoder :</label>
+                                        {{ form.encoder }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </form>
 
-                    // Send POST request to update classifications
-                    fetch("{% url 'mlapp:update_columns' workspace.id dataset.id %}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken(),
-                        },
-                        body: JSON.stringify({
-                            column_name: draggedColumn,
-                            new_type: newType,
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log("Saved successfully:", data.updated_column_types);
-                        } else {
-                            console.error("Error saving:", data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
-                });
+                        </div>
+                        {% endif %}
+                        {% if current_step == 3 %}
+                        <h2>Choix du type de modèle</h2>
+                        <div class="tab-content mt-4">
+                            <form>
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% if current_step == 4 %}
+                        <h2>Choix du type de modèle</h2>
+                        <div class="tab-content mt-4">
+                            <form id="model-type-form">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% if current_step == 5 %}
+                        <h2>Choix du type de modèle</h2>
+                        <div class="tab-content mt-4">
+                            <form id="model-type-form">
+                                {% csrf_token %}
+                                {{ form.as_p }}
 
-                // Allow drag over events
-                group.addEventListener('dragover', function (event) {
-                    event.preventDefault();
-                });
-            });
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <!-- Script JavaScript -->
+                        <script>
+                            // Fonction pour gérer l'affichage dynamique de la section cible
+                            document.getElementById('is_target').addEventListener('change', function() {
+                                const targetSection = document.getElementById('target_section');
+                                targetSection.style.display = (this.value === 'yes') ? 'block' : 'none';
+                            });
 
-            // Handle dragstart on items
-            document.querySelectorAll('.item').forEach(item => {
-                item.addEventListener('dragstart', function (event) {
-                    event.dataTransfer.setData('text', this.dataset.column); // Set the column name
-                });
-            });
+                                    // Fonctions pour le drag and drop
+                                    function allowDrop(event) {
+                                        event.preventDefault();  // Permettre le drop
+                                    }
 
-            // Utility function to get CSRF token
-            function getCSRFToken() {
-                return document.querySelector('[name=csrfmiddlewaretoken]').value;
-            }
-        });
+                                    function drag(event) {
+                                        // Récupérer le nom de la colonne à déplacer
+                                        event.dataTransfer.setData("text", event.target.dataset.column);
+                                    }
+
+                                    function drop(event) {
+                                        event.preventDefault();  // Empêcher le comportement par défaut
+
+                                        // Récupérer le nom de la colonne et le nouveau type de groupe
+                                        const draggedColumn = event.dataTransfer.getData("text");
+                                        const newType = event.target.closest('.group').id;  // Le type de groupe (id du group)
+
+                                        // Vérifier la colonne glissée et le nouveau type
+                                        console.log('Colonne glissée:', draggedColumn);
+                                        console.log('Nouveau type:', newType);
+
+                                        // Envoyer une requête AJAX pour mettre à jour le type de colonne
+                                        fetch("{% url 'mlapp:get_custom_model' workspace.id dataset.id %}", {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRFToken': getCSRFToken(),  // Inclure le token CSRF
+                                            },
+                                            body: JSON.stringify({
+                                                column_name: draggedColumn,
+                                                new_type: newType,
+                                            }),
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                console.log("Mise à jour réussie:", data.updated_column_types);
+                                                // Mettre à jour l'interface utilisateur
+                                                updateColumnDisplay(draggedColumn, newType);
+                                            } else {
+                                                console.error("Erreur de mise à jour:", data.error);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Erreur:", error);
+                                        });
+                                    }
+
+                                    // Fonction pour mettre à jour l'affichage des colonnes
+                                    function updateColumnDisplay(columnName, newType) {
+                                        // Supprimer la colonne de son groupe actuel
+                                        document.querySelectorAll('.group').forEach(group => {
+                                            const columnElement = group.querySelector(`[data-column="${columnName}"]`);
+                                            if (columnElement) {
+                                                columnElement.remove();
+                                            }
+                                        });
+
+                                        // Ajouter la colonne au nouveau groupe
+                                        const newGroup = document.getElementById(newType);
+                                        if (newGroup) {
+                                            const newColumnElement = document.createElement('li');
+                                            newColumnElement.className = 'item';
+                                            newColumnElement.draggable = true;
+                                            newColumnElement.dataset.column = columnName;
+                                            newColumnElement.textContent = columnName;
+                                            newColumnElement.ondragstart = drag;
+                                            newGroup.appendChild(newColumnElement);
+                                        }
+                                    }
+
+                                    // Fonction utilitaire pour récupérer le token CSRF
+                                    function getCSRFToken() {
+                                        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+                                    }
     </script>
-</body>
-</html>

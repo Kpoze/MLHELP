@@ -79,6 +79,7 @@ class ModelTypeForm(forms.Form):
             ]
         self.fields['model_type'] = forms.ChoiceField(
             choices=model_type_choices,
+            required=True,
             widget=forms.Select(attrs={'id': 'model-type'})
         )
 

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Workspace, Datasets, MLModel
+from .models import Workspace, Datasets, MLModel,CustomModelProgression
 import pandas as pd
 import json
 from django.http import JsonResponse
@@ -99,9 +99,9 @@ def setup_experiment(request, df, model_type_choosed, target, data_target=None):
             raise ValueError("Type de modèle invalide.")
         exp.setup(data=df, system_log=False, memory=False, verbose=False, session_id=42)
 
-    request.session['target']         = target
+    request.session['target']               = target
     request.session['model_type_choosed']   = model_type_choosed
-    request.session['data_target']       = data_target if target == 'yes' else None
+    request.session['data_target']          = data_target if target == 'yes' else None
     return exp
 
 # Fonction pour entraîner et sélectionner le meilleur modèle
@@ -253,44 +253,43 @@ def create_preprocessing_pipeline(cleaned_data, column_types):
     return preprocessor
 
 
-def get_model_form(model_type, post_data=None):
+def get_model_form(model_type, data_post=None):
     """Retourne le bon formulaire de sélection de modèle en fonction du type."""
     if model_type == 'classification':
-        return ClassificationModelForm(post_data)
+        return ClassificationModelForm(data_post)  # ✅ Passer `data`
     elif model_type == 'regression':
-        return RegressionModelForm(post_data)
+        return RegressionModelForm(data_post)
     elif model_type == 'clustering':
-        return ClusteringModelForm(post_data)
+        return ClusteringModelForm(data_post)
     return None  # Si aucun type n’est sélectionné
 
-def get_hyperparameter_form(model_type, model_name, post_data=None):
+def get_hyperparameter_form(model_type, model_name, data_post=None):
     """Retourne le formulaire d'hyperparamètres selon le modèle choisi."""
     if model_type == 'classification':
         if model_name == 'random_forest':
-            return RandomForestHyperparametersForm(post_data)
+            return RandomForestHyperparametersForm(data_post) 
         elif model_name == 'svm':
-            return SVMHyperparametersForm(post_data)
-        
+            return SVMHyperparametersForm(data_post)
         elif model_name == 'logistic_regression':
-            return LogisticRegressionHyperparametersForm(post_data)
-        
+            return LogisticRegressionHyperparametersForm(data_post)
+
     elif model_type == 'regression':
         if model_name == 'linear_regression':
-            return LinearRegressionHyperparametersForm(post_data)
+            return LinearRegressionHyperparametersForm(data_post)
         elif model_name == 'ridge_regression':
-            return RidgeRegressionHyperparametersForm(post_data)
+            return RidgeRegressionHyperparametersForm(data_post)
         elif model_name == 'decision_tree':
-            return DecisionTreeHyperparametersForm(post_data)
+            return DecisionTreeHyperparametersForm(data_post)
 
     elif model_type == 'clustering':
         if model_name == 'kmeans':
-            return KMeansHyperparametersForm(post_data)
+            return KMeansHyperparametersForm(data_post)
         elif model_name == 'dbscan':
-            return DBSCANHyperparametersForm(post_data)
+            return DBSCANHyperparametersForm(data_post)
         elif model_name == 'hierarchical':
-            return HierarchicalClusteringHyperparametersForm(post_data)
+            return HierarchicalClusteringHyperparametersForm(data_post)
 
-    return None  # Si aucun modèle n'est sélectionné
+    return None
 ######ROBERT#########################
 @login_required
 def choose_model_way(request, workspace_id, dataset_id):
@@ -362,8 +361,7 @@ def get_pre_model(request, dataset_id, workspace_id):
     })
 
 ###################CUSTOM MODEL######################
-
-def check_target_step(request, dataset_id, workspace_id):
+def get_custom_model_target_step(request, dataset_id, workspace_id):
     try:
         workspace = get_object_or_404(Workspace, id=workspace_id)
         dataset = get_object_or_404(Datasets, id=dataset_id)
@@ -376,40 +374,25 @@ def check_target_step(request, dataset_id, workspace_id):
         # Récupère la valeur de 'is_target' et 'data_target' depuis la requête POST
         is_target = request.POST.get('is_target')
         data_target = request.POST.get('data_target') if is_target == 'yes' else None
-
-        # Crée une instance du formulaire avec les données POST
-        form = ModelTypeForm(is_target=data_target, data=request.POST)
-
-        if form.is_valid():
-            # Récupère le type de modèle choisi
-            model_type = form.cleaned_data['model_type']
-
-            # Sauvegarde la cible et le type de modèle dans la session
-            request.session['data_target'] = data_target
-            request.session['model_type'] = model_type
-
-            # Redirection vers l'étape suivante de prétraitement
-            return redirect('mlapp:get_custom_model_step_1', workspace_id=workspace.id, dataset_id=dataset.id)
-        else:
-            # Si le formulaire n'est pas valide, retourne les erreurs
-            return JsonResponse({"error": form.errors}, status=400)
-
+                    # Sauvegarde la cible et le type de modèle dans la session
+        request.session['data_target'] = data_target
+        return redirect('mlapp:get_custom_model_step_2', workspace_id=workspace.id, dataset_id=dataset.id)
     else:
         # Requête GET, afficher la page de sélection de la cible et du type de modèle
-        form = ModelTypeForm(is_target=None)  # Par défaut, pas de cible
-        return render(request, 'mlapp/get_custom_model_step_0.html', {
+        #form = ModelTypeForm(is_target=None)  # Par défaut, pas de cible
+        return render(request, 'mlapp/get_custom_model_step_1.html', {
             'workspace': workspace,
             'dataset': dataset,
             'columns': list(df.columns),  # Passer les colonnes du dataset à la vue
-            'form': form,  # Passer le formulaire à la vue
+            #'form': form,  # Passer le formulaire à la vue
         })
 
 @login_required
-def preprocessing_step(request, workspace_id, dataset_id):
-    workspace = get_object_or_404(Workspace, id=workspace_id)
-    dataset  = get_object_or_404(Datasets, id=dataset_id)
-    encoding = get_encoding(dataset.file.path)
-    df       = pd.read_csv(dataset.file.path, encoding=encoding)
+def get_custom_model_preprocessing_step(request, workspace_id, dataset_id):
+    workspace    = get_object_or_404(Workspace, id=workspace_id)
+    dataset      = get_object_or_404(Datasets, id=dataset_id)
+    encoding     = get_encoding(dataset.file.path)
+    df           = pd.read_csv(dataset.file.path, encoding=encoding)
     column_types = classify_columns(df)  # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
     target = request.session.get('data_target')
     print(target)
@@ -457,10 +440,10 @@ def preprocessing_step(request, workspace_id, dataset_id):
                 print(preprocessor)
                 print(pickle.loads(base64.b64decode(preprocessor_serialized)))
                 print(form.cleaned_data)  # Logique pour traiter les données du formulaire"""
-                return redirect('mlapp:get_custom_model_step_2', workspace_id, dataset_id)
+                return redirect('mlapp:get_custom_model_step_3', workspace_id, dataset_id)
             
 
-    return render(request, 'mlapp/get_custom_model_step_1.html', {
+    return render(request, 'mlapp/get_custom_model_step_2.html', {
         'workspace': workspace,
         'dataset': dataset,
         'column_types': column_types,  # Données des colonnes classées
@@ -469,49 +452,233 @@ def preprocessing_step(request, workspace_id, dataset_id):
 
 
 @login_required
-def model_step(request, workspace_id, dataset_id):
+def custom_model_type_model_step(request, workspace_id, dataset_id):
     workspace = get_object_or_404(Workspace, id=workspace_id)
-    dataset = get_object_or_404(Datasets, id=dataset_id)
-    encoding = get_encoding(dataset.file.path)
+    dataset   = get_object_or_404(Datasets, id=dataset_id)
+    target    = request.session.get('data_target')
+    form      = ModelTypeForm(target=target)
+    if request.method == "POST":
+        model_type = request.POST.get('model_type')
+        if form.is_valid():
+            request.session['model_type'] = model_type
+            return redirect('mlapp:get_custom_model_step_2', workspace.id, dataset.id)
+        else:
+            form = ModelTypeForm()
+    else:
+        return render(request, 'mlapp/get_custom_model_step_3.html', {
+        'workspace': workspace,
+        'dataset': dataset,
+        'form': ModelTypeForm(),  # Un formulaire global
+    })
 
+
+@login_required
+def get_custom_model_step(request, workspace_id, dataset_id):
+    workspace  = get_object_or_404(Workspace, id=workspace_id)
+    dataset    = get_object_or_404(Datasets, id=dataset_id)
     # Récupération des données
-    data = request.session.get('data')
-    preprocessor = pickle.loads(base64.b64decode(request.session.get('preprocessor')))
-    target = request.session.get('data_target')
-    selected_model_type = None
-    selected_model = None
-    selected_hyperparameter = None
+    #data = request.session.get('data')
+    #preprocessor = pickle.loads(base64.b64decode(request.session.get('preprocessor')))
+    model_type   = request.session.get('model_type')
 
-    # Crée le formulaire pour le type de modèle en passant 'target' pour déterminer les choix
-    model_type_form = ModelTypeForm(target=target)
 
-    model_form = None
-    hyperparameter_form = None
 
     # Si la requête est un POST classique, on récupère les données envoyées
     if request.method == 'POST':
-        model_type = request.POST.get('model_type')
-        model_form = get_model_form(model_type, request.POST) if model_type else None
-        if model_type and model_form.is_valid():
-            # Si un modèle est sélectionné, récupérer le formulaire des hyperparamètres
-            selected_model = model_form.cleaned_data.get('model')
-            hyperparameter_form = get_hyperparameter_form(model_type, selected_model, request.POST)
-
-            if model_form.is_valid() and hyperparameter_form.is_valid():
-                # Enregistrer les choix dans la session
-                request.session['selected_model_type'] = model_type
-                request.session['selected_model'] = selected_model
-                request.session['selected_hyperparameter'] = hyperparameter_form.cleaned_data
+        model = request.POST.get('model')
+        form = get_model_form(model_type, request.POST) if model_type else None
+        if form.is_valid():
+            request.session['model'] = model
                 # Optionnel : redirection vers une autre étape
                 # return redirect('mlapp:next_step')
 
-    return render(request, 'mlapp/get_custom_model_step_2.html', {
+    return render(request, 'mlapp/get_custom_model_step_4.html', {
         'workspace': workspace,
         'dataset': dataset,
-        'model_type_form': model_type_form,
-        'model_form': model_form,
-        'hyperparameter_form': hyperparameter_form,
+        'form': form,
     })
+
+
+
+@login_required
+def get_custom_model_hyperparam_step(request, dataset_id, workspace_id):
+    workspace  = get_object_or_404(Workspace, id=workspace_id)
+    dataset    = get_object_or_404(Datasets, id=dataset_id)
+    model      = request.session.get('model')
+    model_type = request.session.get('model_type')
+    form       = get_hyperparameter_form(model_type,model)
+    if request.method == 'POST':
+        hyperarameter = request.POST.get('hyperarameter')
+        if form.is_valid():
+             print(hyperarameter)
+             request.session['hyperparameter'] = hyperarameter
+
+
+@login_required
+def get_custom_model(request, workspace_id, dataset_id):
+    workspace    = get_object_or_404(Workspace, id=workspace_id)
+    dataset      = get_object_or_404(Datasets, id=dataset_id)
+    encoding     = get_encoding(dataset.file.path)
+    df           = pd.read_csv(dataset.file.path, encoding=encoding)
+    column_types = classify_columns(df)
+
+
+    # Initialiser current_step si ce n'est pas déjà fait
+    if 'current_step' not in request.session:
+        request.session['current_step'] = 1
+
+    current_step = request.session['current_step']
+
+
+    if request.GET.get('back') == '1':
+        if current_step > 1:  
+            request.session['current_step'] -= 1  
+            return redirect('mlapp:get_custom_model', workspace_id=workspace.id, dataset_id=dataset.id)
+        
+    form = None
+    if current_step == 2:
+            if 'column_types' not in request.session:
+                column_types = classify_columns(df)
+            else:
+                column_types = request.session.get('column_types', {
+                    'numeric': [],
+                    'categorical': [],
+                    'text': [],
+                    'boolean': [],
+                    })  # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
+            is_target         = request.session.get('is_target')
+            print(is_target)
+            data_target       = request.session.get('data_target')
+            print(data_target)
+            form              = PreprocessingForm()
+ 
+    elif current_step == 3:
+            is_target         = request.session.get('is_target')
+            print(is_target)
+            data_target       = request.session.get('data_target')
+            print(data_target)
+            form              = ModelTypeForm(is_target)
+
+    elif current_step == 4:
+            model_type   = request.session.get('model_type')
+            print(model_type)
+            form         = get_model_form(model_type)
+
+    elif current_step == 5:
+            model      = request.session.get('model')
+            print(model)
+            model_type = request.session.get('model_type')
+            print(model_type)
+            form       = get_hyperparameter_form(model_type, model)
+            print(form)
+
+        # Gestion des soumissions
+    if request.method == 'POST':
+            if current_step == 1:
+                    is_target                      = request.POST.get('is_target')
+                    data_target                    = request.POST.get('data_target') if request.POST.get('is_target') == 'yes' else None
+                    request.session['data_target'] = data_target
+                    request.session['is_target']   = is_target
+
+
+            elif current_step == 2:
+                    if request.headers.get('Content-Type') == 'application/json':
+                        try:
+                            column_data = json.loads(request.body)
+                            column_name = column_data.get('column_name')
+                            new_type = column_data.get('new_type')
+                            column_types = request.session.get('column_types', {
+                                    'numeric': [],
+                                    'categorical': [],
+                                    'text': [],
+                                    'boolean': [],
+                                })
+                            # Validation des données envoyées
+                            if column_name not in df.columns:
+                                return JsonResponse({'success': False, 'error': 'Column not found in dataset.'}, status=400)
+
+                            if new_type not in column_types:
+                                return JsonResponse({'success': False, 'error': 'Invalid column type.'}, status=400)
+
+                            # Déplacement de la colonne entre les types
+                            for key in column_types.keys():
+                                if column_name in column_types[key]:
+                                    column_types[key].remove(column_name)
+                                    break
+                            column_types[new_type].append(column_name)
+
+                            # Sauvegarder l'état global dans la session
+                            print(column_types)
+                            request.session['column_types'] = column_types
+
+                            # Retourner la liste mise à jour des colonnes
+                            return JsonResponse({'success': True, 'updated_column_types': column_types})
+
+                        except Exception as e:
+                            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+                    # Sinon, traite la soumission du formulaire
+                    else:
+                        form = PreprocessingForm(request.POST)
+                        if form.is_valid():
+                            print(column_types)
+                            data                            = split_data(df,data_target,0.2,42)
+                            preprocessor                    = create_preprocessing_pipeline(form.cleaned_data,column_types)
+                            preprocessor_serialized         = base64.b64encode(pickle.dumps(preprocessor)).decode('utf-8')
+                            request.session['data']         = data
+                            request.session['preprocessor'] = preprocessor_serialized
+                            #print(data)
+                            #print(preprocessor_serialized)
+                            #progression.save()
+                            # Sérialisation avec pickle et encodage Base64
+                            """print(data)
+                            print(preprocessor)
+                            print(pickle.loads(base64.b64decode(preprocessor_serialized)))
+                            print(form.cleaned_data)  # Logique pour traiter les données du formulaire"""
+
+            elif current_step == 3:
+                    #print( request.POST.get('model_type'))
+                    form = ModelTypeForm(is_target,request.POST) 
+                    if form.is_valid():
+                        model_type = form.cleaned_data['model_type']
+                        request.session['model_type'] = model_type
+                        print(request.session['model_type'])
+                        print(model_type)
+                        #progression.save()
+
+            elif current_step == 4:
+                    form = get_model_form(model_type,request.POST)
+                    if form.is_valid():
+                        #progression.model_name = model_name
+                        model = form.cleaned_data['model']
+                        request.session['model'] = model
+                        print(model)
+                        #progression.save()
+
+            elif current_step == 5:
+                    form = get_hyperparameter_form(model_type, model, request.POST)
+                    if form.is_valid():
+                        hyperarameter            = form.cleaned_data
+                        request.session['hyperarameter'] = hyperarameter
+                        print(request.session)
+                        print(hyperarameter)
+                        #request.session['hyperparameter'] = hyperarameter
+
+                        return JsonResponse({'status': 'success', 'message': 'Modèle configuré avec succès!'})
+            # Passer à l’étape suivante
+            request.session['current_step'] += 1
+
+            return redirect('mlapp:get_custom_model', workspace_id=workspace.id, dataset_id=dataset.id)
+
+    return render(request, 'mlapp/get_custom_model.html', {
+            'workspace'    : workspace,
+            'dataset'      : dataset,
+            'form'         : form,
+            'current_step' : current_step,
+            'columns'      : list(df.columns),
+            'column_types' : column_types,
+        })
+
+
 
 """def get_custom_model(request, dataset_id, workspace_id):
     # Chargement des données et initialisation
