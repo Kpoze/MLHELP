@@ -37,7 +37,7 @@
                  aria-valuenow="{{ current_step }}" 
                  aria-valuemin="1" 
                  aria-valuemax="5">
-                Étape {{ current_step }} / 5
+                Étape {{ current_step }} / 6
             </div>
         </div>
 
@@ -156,6 +156,17 @@
                                 <a href="?back=1" class="btn btn-secondary">Retour</a>
                                 {% endif %}
                                 <button type="submit" class="btn btn-primary mt-3">Suivant</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% if current_step == 6 %}
+                        <h2>Récapitulatif</h2>
+                        <div class="tab-content mt-4">
+                            <form id="model-type-form">
+                                {% if current_step > 1 %}
+                                <a href="?back=1" class="btn btn-secondary">Retour</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary mt-3">soumettre</button>
                             </form>
                         </div>
                         {% endif %}

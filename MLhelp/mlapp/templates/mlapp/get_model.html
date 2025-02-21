@@ -66,8 +66,8 @@
 
             <!-- Choix du type de modèle -->
             <div class="mb-3">
-                <label for="model_choosed" class="form-label">Choisissez le type de modèle :</label>
-                <select class="form-select" name="model_choosed" id="model_choosed">
+                <label for="model_type_choosed" class="form-label">Choisissez le type de modèle :</label>
+                <select class="form-select" name="model_type_choosed" id="model_type_choosed">
                     <option value="" disabled {% if not request.session.model_choosed %}selected{% endif %}>-- Sélectionnez un modèle --</option>
                     <option value="Classification" {% if request.session.model_choosed == 'Classification' %}selected{% endif %}>Classification</option>
                     <option value="Regression" {% if request.session.model_choosed == 'Regression' %}selected{% endif %}>Régression</option>
@@ -80,33 +80,12 @@
             <!-- Champ pour nom du modèle -->
             <div class="mb-3">
                 <label for="model_name" class="form-label">Nom du modèle :</label>
-                <input type="text" class="form-control" name="model_name" id="model_name" placeholder="Entrez un nom pour le modèle" value="{% if request.session.model_name %}{{ request.session.model_name }}{% endif %}">
+                <input type="text" class="form-control" name="model_name" id="model_name" placeholder="Robert" value="{% if request.session.model_name %}{{ request.session.model_name }}{% endif %}">
             </div>
 
             <!-- Boutons de soumission -->
             <button type="submit" class="btn btn-primary" name="action" value="train_model">Entraîner le modèle</button>
         </form>
-        
-        <!-- Résultats de l'entraînement -->
-        {% if best_model %}
-        <div id="result_training" class="result-section mt-4">
-            <h2>Résultats de l'entraînement</h2>
-            <p><strong>Meilleur modèle :</strong> {{ model_name }}</p>
-            <pre><strong>Paramètres :</strong> {{ model_param }}</pre>
-        </div>
-        {% else %}
-        <div class="alert alert-info mt-4" id="no_model_message">
-            Aucun modèle n'a encore été entraîné. Veuillez soumettre le formulaire pour commencer.
-        </div>
-        {% endif %}
-        <!-- Message d'erreur -->
-        {% if error %}
-        <div class="alert alert-danger mt-3">
-            <strong>Erreur :</strong> {{ error }}
-        </div>
-        {% endif %}
-    </div>
-        
     <!-- Script JavaScript -->
     <script>
         // Fonction pour gérer l'affichage dynamique de la section cible

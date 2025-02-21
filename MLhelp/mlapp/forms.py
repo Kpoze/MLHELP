@@ -84,7 +84,7 @@ class ModelTypeForm(forms.Form):
         )
 
 CLASSIFICATION_MODEL_CHOICES = [
-    ('random_forest', 'Random Forest'),
+    ('random_forest_classifier', 'Random Forest'),
     ('svm', 'SVM'),
     ('logistic_regression', 'Régression Logistique'),
 ]

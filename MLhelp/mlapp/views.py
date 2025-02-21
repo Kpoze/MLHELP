@@ -34,7 +34,14 @@ from sklearn.impute import SimpleImputer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import pickle
 import base64
+import uuid
 ###############FUNCTION#####################
+
+
+def generate_unique_suffix():
+    return str(uuid.uuid4())[:8] 
+
+
 
 def get_encoding(df):
     with open(df, 'rb') as f:
@@ -64,13 +71,18 @@ def save_model_and_experiment(request,workspace, dataset,model_type_choosed,mode
     return ml_model
 
 def get_data_post(request):
-    
+    target = request.POST.get("is_target")
+    model_type_choosed = request.POST.get("model_type_choosed")
+    data_target = request.POST.get("data_target") if target == 'yes' else None
+    model_name_input = request.POST.get("model_name") or "Robert"
+    unique_suffix = generate_unique_suffix()
     data = {
-        'target'              : request.POST.get("target"),
-        'model_type_choosed'  : request.POST.get("model_type_choosed"),
-        'data_target'         : request.POST.get("data_target") if data.target == 'yes' else None,
-        'model_name_input'    : request.POST.get("model_name") or "Robert",
-    }
+                'target': target,
+                'model_type_choosed': model_type_choosed,
+                'data_target': data_target,
+                'model_name_input': model_name_input,
+                'model_name_input_file' : f"{model_name_input}_{unique_suffix}"
+            }
     return data 
 ###############FUNCTION PRE-MODEL#####################
 
@@ -98,10 +110,6 @@ def setup_experiment(request, df, model_type_choosed, target, data_target=None):
         else:
             raise ValueError("Type de modèle invalide.")
         exp.setup(data=df, system_log=False, memory=False, verbose=False, session_id=42)
-
-    request.session['target']               = target
-    request.session['model_type_choosed']   = model_type_choosed
-    request.session['data_target']          = data_target if target == 'yes' else None
     return exp
 
 # Fonction pour entraîner et sélectionner le meilleur modèle
@@ -266,7 +274,7 @@ def get_model_form(model_type, data_post=None):
 def get_hyperparameter_form(model_type, model_name, data_post=None):
     """Retourne le formulaire d'hyperparamètres selon le modèle choisi."""
     if model_type == 'classification':
-        if model_name == 'random_forest':
+        if model_name == 'random_forest_classifier':
             return RandomForestHyperparametersForm(data_post) 
         elif model_name == 'svm':
             return SVMHyperparametersForm(data_post)
@@ -290,6 +298,22 @@ def get_hyperparameter_form(model_type, model_name, data_post=None):
             return HierarchicalClusteringHyperparametersForm(data_post)
 
     return None
+
+def train_custom_model(model,data,preprocessor,hyperparameter):
+    preprocess = pickle.loads(base64.b64decode(preprocessor))
+    if model == 'random_forest_classifier':
+        from sklearn.ensemble import RandomForestClassifier
+        the_model = RandomForestClassifier(n_estimators=hyperparameter['n_estimators'],max_depth=hyperparameter['max_depth'])
+    elif model == 'svm':
+        from sklearn import svm
+        the_model = svm.SVC(C=hyperparameter['C'],kernel=hyperparameter['kernel'])
+    elif model == 'logistic_regression':
+        from sklearn.linear_model import LogisticRegression
+        the_model = LogisticRegression(C=hyperparameter['C'],max_iter=hyperparameter['max_iter'],solver=hyperparameter['solver'],penalty=hyperparameter['penalty'],tol=hyperparameter['tol'])
+    elif model == 'linear_regression':
+        from sklearn.linear_model import LinearRegression
+        the_model = LinearRegression(fit_intercept=hyperparameter['fit_intercept'],normalize=hyperparameter['normalize'])
+    
 ######ROBERT#########################
 @login_required
 def choose_model_way(request, workspace_id, dataset_id):
@@ -312,43 +336,44 @@ def get_pre_model(request, dataset_id, workspace_id):
     except Exception as e:
         return JsonResponse({"error": f"Erreur de chargement des données : {str(e)}"}, status=500)
     # Initialisation des variables
+
     model_data = {
         'best_model'  : None,
         'model_name'  : None,
         'model_param' : None,
-        'model_name'  :None,
     }
+
     if request.method == "POST":
-        try:
+        #try:
             # Récupérer les paramètres utilisateur
             data = get_data_post(request)
-            model_type_choosed = data.model_type_choosed  # Récupère la valeur du formulaire
-            request.session['model_type_choosed'] = model_type_choosed  # Stocke dans la session
-            print(f"Type de modèle : {data.model_type_choosed}")
-            print(f"Colonne cible : {data.data_target}")
-            print(f"Nom du modèle : {data.model_name_input}")
-            exp = setup_experiment(request, df, data.model_type_choosed, data.target, data.data_target)
+            print(data)  
+            request.session['model_type_choosed'] = data['model_type_choosed']
+            print(f"Type de modèle : {data['model_type_choosed']}")
+            print(f"Colonne cible : {data['data_target']}")
+            print(f"Nom du modèle : {data['model_name_input']}")
+            exp = setup_experiment(request, df, data['model_type_choosed'], data['target'], data['data_target'])
 
                 # Entraîner et sélectionner le meilleur modèle
-            model_data.best_model = train_and_select_best_model(exp)
+            model_data['best_model'] = train_and_select_best_model(exp)
 
                 # Obtenir le nom et les paramètres du modèle
-            model_data.model_name       = type(model_data.best_model).__name__
-            model_data.model_param      = model_data.best_model.get_params()
-            json_model_param = json.dumps(model_data.model_param )
+            model_data['model_name']       = type( model_data['best_model']).__name__
+            model_data['model_param']      =  model_data['best_model'].get_params()
+            json_model_param = json.dumps(model_data['model_param'])
 
                 # Sauvegarder le modèle et l'expérience
-            exp_filepath = save_experiment_to_media(exp, data.model_name_input)
-            model_file_path = save_model_to_media(exp, model_data.best_model, data.model_name_input)
+            exp_filepath = save_experiment_to_media(exp, data['model_name_input'])
+            model_file_path = save_model_to_media(exp, model_data['best_model'], data['model_name_input_file'])
             ml_model = save_model_and_experiment(
-                    request, workspace, dataset, data.model_type_choosed, data.model_name_input,
+                    request, workspace, dataset, data['model_type_choosed'], data['model_name_input'],
                     json_model_param, model_file_path, exp, exp_filepath
                 )
 
             print(f"Modèle PyCaret sauvegardé avec succès (ID : {ml_model.id})")
             return redirect(reverse('mlapp:detail_model', kwargs={'workspace_id': workspace.id, 'dataset_id': dataset.id}))
-        except Exception as e:
-            return JsonResponse({"error": f"Erreur lors du traitement : {str(e)}"}, status=500)
+            """except Exception as e:
+            return JsonResponse({"error": f"Erreur lors du traitement : {str(e)}"}, status=500)"""
 
     # Retourner les résultats à la vue
     return render(request, "mlapp/get_model.html", {
@@ -361,159 +386,6 @@ def get_pre_model(request, dataset_id, workspace_id):
     })
 
 ###################CUSTOM MODEL######################
-def get_custom_model_target_step(request, dataset_id, workspace_id):
-    try:
-        workspace = get_object_or_404(Workspace, id=workspace_id)
-        dataset = get_object_or_404(Datasets, id=dataset_id)
-        encoding = get_encoding(dataset.file.path)
-        df = pd.read_csv(dataset.file.path, encoding=encoding)
-    except Exception as e:
-        return JsonResponse({"error": f"Erreur de chargement des données : {str(e)}"}, status=500)
-
-    if request.method == "POST":
-        # Récupère la valeur de 'is_target' et 'data_target' depuis la requête POST
-        is_target = request.POST.get('is_target')
-        data_target = request.POST.get('data_target') if is_target == 'yes' else None
-                    # Sauvegarde la cible et le type de modèle dans la session
-        request.session['data_target'] = data_target
-        return redirect('mlapp:get_custom_model_step_2', workspace_id=workspace.id, dataset_id=dataset.id)
-    else:
-        # Requête GET, afficher la page de sélection de la cible et du type de modèle
-        #form = ModelTypeForm(is_target=None)  # Par défaut, pas de cible
-        return render(request, 'mlapp/get_custom_model_step_1.html', {
-            'workspace': workspace,
-            'dataset': dataset,
-            'columns': list(df.columns),  # Passer les colonnes du dataset à la vue
-            #'form': form,  # Passer le formulaire à la vue
-        })
-
-@login_required
-def get_custom_model_preprocessing_step(request, workspace_id, dataset_id):
-    workspace    = get_object_or_404(Workspace, id=workspace_id)
-    dataset      = get_object_or_404(Datasets, id=dataset_id)
-    encoding     = get_encoding(dataset.file.path)
-    df           = pd.read_csv(dataset.file.path, encoding=encoding)
-    column_types = classify_columns(df)  # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
-    target = request.session.get('data_target')
-    print(target)
-
-    if request.method == 'POST':
-        # Vérifie si la requête contient des données JSON (drag-and-drop)
-        if request.headers.get('Content-Type') == 'application/json':
-            try:
-                column_data = json.loads(request.body)
-                column_name = column_data.get('column_name')
-                new_type    = column_data.get('new_type')
-
-                # Validation des données envoyées
-                if column_name not in df.columns:
-                    return JsonResponse({'success': False, 'error': 'Column not found in dataset.'}, status=400)
-
-                if new_type not in column_types:
-                    return JsonResponse({'success': False, 'error': 'Invalid column type.'}, status=400)
-
-                # Déplacement de la colonne entre les types
-                for key in column_types.keys():
-                    if column_name in column_types[key]:
-                        column_types[key].remove(column_name)
-                        break
-                column_types[new_type].append(column_name)
-                print()
-
-                # Retourner la liste mise à jour des colonnes
-                return JsonResponse({'success': True, 'updated_column_types': column_types})
-
-            except Exception as e:
-                return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-        # Sinon, traite la soumission du formulaire
-        else:
-            form = PreprocessingForm(request.POST)
-            if form.is_valid():
-                data   = split_data(df,target,0.2,42)
-                preprocessor            = create_preprocessing_pipeline(form.cleaned_data,column_types)
-                preprocessor_serialized = base64.b64encode(pickle.dumps(preprocessor)).decode('utf-8')
-                request.session['data']         = data
-                request.session['preprocessor'] = preprocessor_serialized
-                # Sérialisation avec pickle et encodage Base64
-                """print(data)
-                print(preprocessor)
-                print(pickle.loads(base64.b64decode(preprocessor_serialized)))
-                print(form.cleaned_data)  # Logique pour traiter les données du formulaire"""
-                return redirect('mlapp:get_custom_model_step_3', workspace_id, dataset_id)
-            
-
-    return render(request, 'mlapp/get_custom_model_step_2.html', {
-        'workspace': workspace,
-        'dataset': dataset,
-        'column_types': column_types,  # Données des colonnes classées
-        'form': PreprocessingForm(),  # Un formulaire global
-    })
-
-
-@login_required
-def custom_model_type_model_step(request, workspace_id, dataset_id):
-    workspace = get_object_or_404(Workspace, id=workspace_id)
-    dataset   = get_object_or_404(Datasets, id=dataset_id)
-    target    = request.session.get('data_target')
-    form      = ModelTypeForm(target=target)
-    if request.method == "POST":
-        model_type = request.POST.get('model_type')
-        if form.is_valid():
-            request.session['model_type'] = model_type
-            return redirect('mlapp:get_custom_model_step_2', workspace.id, dataset.id)
-        else:
-            form = ModelTypeForm()
-    else:
-        return render(request, 'mlapp/get_custom_model_step_3.html', {
-        'workspace': workspace,
-        'dataset': dataset,
-        'form': ModelTypeForm(),  # Un formulaire global
-    })
-
-
-@login_required
-def get_custom_model_step(request, workspace_id, dataset_id):
-    workspace  = get_object_or_404(Workspace, id=workspace_id)
-    dataset    = get_object_or_404(Datasets, id=dataset_id)
-    # Récupération des données
-    #data = request.session.get('data')
-    #preprocessor = pickle.loads(base64.b64decode(request.session.get('preprocessor')))
-    model_type   = request.session.get('model_type')
-
-
-
-    # Si la requête est un POST classique, on récupère les données envoyées
-    if request.method == 'POST':
-        model = request.POST.get('model')
-        form = get_model_form(model_type, request.POST) if model_type else None
-        if form.is_valid():
-            request.session['model'] = model
-                # Optionnel : redirection vers une autre étape
-                # return redirect('mlapp:next_step')
-
-    return render(request, 'mlapp/get_custom_model_step_4.html', {
-        'workspace': workspace,
-        'dataset': dataset,
-        'form': form,
-    })
-
-
-
-@login_required
-def get_custom_model_hyperparam_step(request, dataset_id, workspace_id):
-    workspace  = get_object_or_404(Workspace, id=workspace_id)
-    dataset    = get_object_or_404(Datasets, id=dataset_id)
-    model      = request.session.get('model')
-    model_type = request.session.get('model_type')
-    form       = get_hyperparameter_form(model_type,model)
-    if request.method == 'POST':
-        hyperarameter = request.POST.get('hyperarameter')
-        if form.is_valid():
-             print(hyperarameter)
-             request.session['hyperparameter'] = hyperarameter
-
-
 @login_required
 def get_custom_model(request, workspace_id, dataset_id):
     workspace    = get_object_or_404(Workspace, id=workspace_id)
@@ -537,15 +409,11 @@ def get_custom_model(request, workspace_id, dataset_id):
         
     form = None
     if current_step == 2:
+            column_types = classify_columns(df)
             if 'column_types' not in request.session:
-                column_types = classify_columns(df)
+                column_types  = classify_columns(df)
             else:
-                column_types = request.session.get('column_types', {
-                    'numeric': [],
-                    'categorical': [],
-                    'text': [],
-                    'boolean': [],
-                    })  # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
+                column_types  = request.session.get('column_types') # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
             is_target         = request.session.get('is_target')
             print(is_target)
             data_target       = request.session.get('data_target')
@@ -570,7 +438,17 @@ def get_custom_model(request, workspace_id, dataset_id):
             model_type = request.session.get('model_type')
             print(model_type)
             form       = get_hyperparameter_form(model_type, model)
-            print(form)
+    
+    elif current_step == 6 : 
+        is_target       = request.session.get('is_target')
+        data_target     = request.session.get('data_target')
+        data            = request.session.get('data')
+        preprocessor    = request.session.get('preprocessor')
+        model_type      = request.session.get('model_type')
+        model           = request.session.get('model')
+        hyperparameter  = request.session.get('hyperparameter')
+
+
 
         # Gestion des soumissions
     if request.method == 'POST':
@@ -580,19 +458,12 @@ def get_custom_model(request, workspace_id, dataset_id):
                     request.session['data_target'] = data_target
                     request.session['is_target']   = is_target
 
-
             elif current_step == 2:
                     if request.headers.get('Content-Type') == 'application/json':
                         try:
                             column_data = json.loads(request.body)
                             column_name = column_data.get('column_name')
                             new_type = column_data.get('new_type')
-                            column_types = request.session.get('column_types', {
-                                    'numeric': [],
-                                    'categorical': [],
-                                    'text': [],
-                                    'boolean': [],
-                                })
                             # Validation des données envoyées
                             if column_name not in df.columns:
                                 return JsonResponse({'success': False, 'error': 'Column not found in dataset.'}, status=400)
@@ -621,6 +492,7 @@ def get_custom_model(request, workspace_id, dataset_id):
                         form = PreprocessingForm(request.POST)
                         if form.is_valid():
                             print(column_types)
+                            print(form.cleaned_data)
                             data                            = split_data(df,data_target,0.2,42)
                             preprocessor                    = create_preprocessing_pipeline(form.cleaned_data,column_types)
                             preprocessor_serialized         = base64.b64encode(pickle.dumps(preprocessor)).decode('utf-8')
@@ -657,11 +529,18 @@ def get_custom_model(request, workspace_id, dataset_id):
             elif current_step == 5:
                     form = get_hyperparameter_form(model_type, model, request.POST)
                     if form.is_valid():
-                        hyperarameter            = form.cleaned_data
-                        request.session['hyperarameter'] = hyperarameter
-                        print(request.session)
-                        print(hyperarameter)
-                        #request.session['hyperparameter'] = hyperarameter
+                        hyperparameter = form.cleaned_data
+                        request.session['hyperparameter'] = hyperparameter
+                        print(hyperparameter)
+
+            elif current_step == 6:
+                        print(is_target)
+                        print(data_target)
+                        print(data)
+                        print(preprocessor)
+                        print(model_type)
+                        print(model)
+                        print(hyperparameter)
 
                         return JsonResponse({'status': 'success', 'message': 'Modèle configuré avec succès!'})
             # Passer à l’étape suivante
@@ -677,174 +556,6 @@ def get_custom_model(request, workspace_id, dataset_id):
             'columns'      : list(df.columns),
             'column_types' : column_types,
         })
-
-
-
-"""def get_custom_model(request, dataset_id, workspace_id):
-    # Chargement des données et initialisation
-    try:
-        workspace = get_object_or_404(Workspace, id=workspace_id)
-        dataset   = get_object_or_404(Datasets, id=dataset_id)
-
-        encoding = get_encoding(dataset.file.path)
-        df       = pd.read_csv(dataset.file.path, encoding=encoding)
-
-    except Exception as e:
-        return JsonResponse({"error": f"Erreur de chargement des données : {str(e)}"}, status=500)
-    # Initialisation des variables
-    model_data = {
-        'model'       : None,
-        'model_param' : None,
-    }
-    if request.method == "POST":
-            # Récupérer les paramètres utilisateur
-            data = get_data_post(request)
-            print(f"Type de modèle : {data.model_type_choosed}")
-            print(f"Colonne cible : {data.data_target}")
-            print(f"Nom du modèle : {data.model_name_input}")
-            column_types      = classify_columns(df)  # Récupère les types de colonnes
-            #df_split_data     = split_data(df,data.data_target,0.2,42)
-            Preprocessing_form = PreprocessingForm()
-            # Extraire les données JSON envoyées
-                    # Créer le formulaire du modèle spécifique en fonction du type de modèle
-            if data.data_target == 'Yes':
-                if data.model_type_choosed == 'classification':
-                    model_form = ClassificationModelForm(request.POST)
-                    if model_data.model == 'random_forest':
-                        hyperparameters_form = RandomForestHyperparametersForm(request.POST)
-                    elif model_data.model == 'svm':
-                        hyperparameters_form = SVMHyperparametersForm(request.POST)
-                    else:
-                        hyperparameters_form = None
-                elif data.model_type_choosed == 'regression':
-                    model_form = RegressionModelForm(request.POST)
-                else:
-                    model_form = None
-            else : 
-                if data.model_type_choosed == 'clustering':
-                    model_form = ClusteringModelForm(request.POST)
-                    if model_data.model == 'kmeans':
-                        hyperparameters_form = KMeansHyperparametersForm(request.POST)
-                    else:
-                        hyperparameters_form = None
-                else:
-                    model_form = None
-            
-                    # Valider les formulaires
-            if   model_form.is_valid() and  hyperparameters_form.is_valid():
-                    print("Modèle spécifique:", model_form.cleaned_data)
-                    print("Hyperparamètres:", hyperparameters_form.cleaned_data)
-                
-            return render(request, 'mlapp/get_custom_model.html', {
-        'workspace'           : workspace,
-        'dataset'             : dataset,
-        'column_types'        : column_types,
-        'Preprocessing_form'  : Preprocessing_form,
-        'model_form'          : model_form,  
-        'hyperparameters_form': hyperparameters_form, 
-    })"""
-            
-            
-
-# Vue pour gérer les changements de colonnes (drag-and-drop)
-def check_classify_columns(request, workspace_id, dataset_id):
-    if request.method == 'POST' and request.headers.get('Content-Type') == 'application/json':
-        try:
-            workspace = get_object_or_404(Workspace, id=workspace_id)
-            dataset = get_object_or_404(Datasets, id=dataset_id)
-            df = pd.read_csv(dataset.file.path)
-            column_types = classify_columns(df)
-
-            # Extraire les données JSON envoyées
-            data = json.loads(request.body)
-            column_name = data.get('column_name')
-            new_type = data.get('new_type')
-
-            if column_name not in df.columns:
-                return JsonResponse({'success': False, 'error': 'Column not found in dataset.'}, status=400)
-
-            if new_type not in column_types:
-                return JsonResponse({'success': False, 'error': 'Invalid column type.'}, status=400)
-
-            # Déplacer la colonne vers la nouvelle catégorie
-            for key in column_types.keys():
-                if column_name in column_types[key]:
-                    column_types[key].remove(column_name)
-                    break
-            column_types[new_type].append(column_name)
-
-            return JsonResponse({'success': True, 'updated_column_types': column_types})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
-
-# Vue pour traiter le formulaire global
-def custom_preprocess_form(request):
-    if request.method == 'POST':
-        PreprocessingForm_form = PreprocessingForm(request.POST)
-        if PreprocessingForm_form.is_valid():
-            cleaned_data = PreprocessingForm_form.cleaned_data
-            print(cleaned_data)  # Logique de traitement des données ici
-            return JsonResponse({'success': True, 'message': 'Form data processed successfully.'})
-        else:
-            return JsonResponse({'success': False, 'error': 'Invalid form data.'}, status=400)
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
-
-
-
-@login_required
-def check_classify_columns(request, workspace_id, dataset_id):
-    workspace = get_object_or_404(Workspace, id=workspace_id)
-    dataset = get_object_or_404(Datasets, id=dataset_id)
-    encoding = get_encoding(dataset.file.path)
-    df = pd.read_csv(dataset.file.path, encoding=encoding)
-    column_types = classify_columns(df)  # Récupère les colonnes classées par type ('numeric', 'categorical', etc.)
-
-    if request.method == 'POST':
-        # Vérifie si la requête contient des données JSON (drag-and-drop)
-        if request.headers.get('Content-Type') == 'application/json':
-            try:
-                data        = json.loads(request.body)
-                column_name = data.get('column_name')
-                new_type    = data.get('new_type')
-
-                # Validation des données envoyées
-                if column_name not in df.columns:
-                    return JsonResponse({'success': False, 'error': 'Column not found in dataset.'}, status=400)
-
-                if new_type not in column_types:
-                    return JsonResponse({'success': False, 'error': 'Invalid column type.'}, status=400)
-
-                # Déplacement de la colonne entre les types
-                for key in column_types.keys():
-                    if column_name in column_types[key]:
-                        column_types[key].remove(column_name)
-                        break
-                column_types[new_type].append(column_name)
-
-                # Retourner la liste mise à jour des colonnes
-                return JsonResponse({'success': True, 'updated_column_types': column_types})
-
-            except Exception as e:
-                return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-        # Sinon, traite la soumission du formulaire
-        else:
-            form = PreprocessingForm(request.POST)
-            if form.is_valid():
-                cleaned_data = form.cleaned_data
-                print(cleaned_data)  # Logique pour traiter les données du formulaire
-                return JsonResponse({'success': True, 'message': 'Formulaire traité avec succès.'})
-            else:
-                return JsonResponse({'success': False, 'error': 'Formulaire invalide.'}, status=400)
-
-    # Si méthode GET, renvoie le template avec les données initiales
-    return render(request, 'mlapp/custom_model_preprocessing_step.html', {
-        'workspace': workspace,
-        'dataset': dataset,
-        'column_types': column_types,  # Données des colonnes classées
-        'form': PreprocessingForm(),  # Un formulaire global
-    })
 ###########################################################################
 
 @login_required

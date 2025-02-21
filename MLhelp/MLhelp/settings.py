@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'dashboard:home'
 
 AUTH_USER_MODEL = 'authentication.user'
 
